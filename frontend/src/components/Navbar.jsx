@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import {
   FaMale,
   FaFemale,
@@ -38,6 +38,27 @@ import {
 } from "react-icons/fa";
 import { useSession, signOut } from "next-auth/react";
 import { useWishlist } from "@/context/WishlistContext";
+import { useCart } from "@/context/CartContext"; // Cart context-оо импортлоорой
+import dynamic from "next/dynamic";
+
+// Leaflet болон react-leaflet-ийг динамикаар импортлох (SSR-гүй)
+
+const MapContainer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.MapContainer),
+  { ssr: false }
+);
+const TileLayer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.TileLayer),
+  { ssr: false }
+);
+const Marker = dynamic(
+  () => import("react-leaflet").then((mod) => mod.Marker),
+  { ssr: false }
+);
+const Popup = dynamic(
+  () => import("react-leaflet").then((mod) => mod.Popup),
+  { ssr: false }
+);
 
 function CategoryIcon({ icon: Icon, label, href, isActive = false }) {
   return (
@@ -58,14 +79,25 @@ export default function Navbar() {
   const pathname = usePathname();
   const { data: session, status } = useSession();
   const { wishlist } = useWishlist();
+  const { cartItems = [] } = useCart(); // cart context-оос cartItems авна
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [location, setLocation] = useState("Сүхбаатрын талбай...");
+  const [mapPosition, setMapPosition] = useState([47.918873, 106.917701]); // default: Ulaanbaatar
+  const [showMap, setShowMap] = useState(false);
+  const [tempPosition, setTempPosition] = useState(mapPosition); // Түр хадгалах байршил
 
   const isAdmin = session?.user?.email === "muujig165@gmail.com";
   const userName = session?.user?.name || "";
   const userRole = session?.role || (session?.user?.role ?? "");
+
+  // Нийт үнэ тооцоолох
+  const cartTotal = cartItems.reduce(
+    (sum, item) => sum + (item.price || 0) * (item.quantity || 1),
+    0
+  );
 
   useEffect(() => {
     const handleScroll = () => {
@@ -86,6 +118,70 @@ export default function Navbar() {
     }
   };
 
+  // Байршил авах функц (OpenStreetMap + Leaflet)
+  const handleGetLocation = () => {
+    if (!navigator.geolocation) {
+      setLocation("Таны төхөөрөмж байршил дэмжихгүй байна");
+      return;
+    }
+    setLocation("Байршил тодорхойлж байна...");
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        setMapPosition([latitude, longitude]);
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=mn`
+          );
+          const data = await res.json();
+          const address = data.address;
+          const sum = address.suburb || address.town || address.village || "";
+          const duureg = address.city_district || address.county || address.state || "";
+          setLocation(
+            [sum, duureg].filter(Boolean).join(", ") || "Байршил тодорхойлогдсонгүй"
+          );
+        } catch {
+          setLocation("Байршил тодорхойлох боломжгүй байна");
+        }
+      },
+      () => {
+        setLocation("Байршил авах боломжгүй байна");
+      }
+    );
+  };
+
+  // Газрын зураг дээр маркерийг чирж өөрчлөх функц
+  const handleMarkerDrag = (e) => {
+    const { lat, lng } = e.target.getLatLng();
+    setTempPosition([lat, lng]);
+  };
+
+  // Popup-оос байршлыг батлах
+  const handleConfirmLocation = async () => {
+    setMapPosition(tempPosition);
+    setShowMap(false);
+    setLocation("Байршил тодорхойлж байна...");
+    try {
+      const [latitude, longitude] = tempPosition;
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&accept-language=mn`
+      );
+      const data = await res.json();
+      const address = data.address;
+      // Илүү дэлгэрэнгүй хаяг бүрдүүлэх
+      const details = [
+        address.road,         // Гудамж
+        address.house_number, // Байрны дугаар
+        address.suburb,       // Дэд хороолол/хороо
+        address.city_district || address.county || address.state, // Дүүрэг
+        address.city || address.town || address.village, 
+      ].filter(Boolean).join(", ");
+      setLocation(details || "Байршил тодорхойлогдсонгүй");
+    } catch {
+      setLocation("Байршил тодорхойлох боломжгүй байна");
+    }
+  };
+
   const categories = [
     { icon: FaMale, label: "Эрэгтэй", href: "/category/mens", key: "mensneaker" },
     { icon: FaFemale, label: "Эмэгтэй", href: "/category/womens", key: "womensneaker" },
@@ -96,6 +192,20 @@ export default function Navbar() {
     { icon: FaGamepad, label: "И-Спорт", href: "/category/esports", key: "esports" },
     { icon: FaBook, label: "Ном", href: "/category/books", key: "books" }
   ];
+
+  // Custom icon-ыг зөвхөн client дээр үүсгэнэ
+  const customIcon = useMemo(() => {
+    if (typeof window === "undefined") return null;
+    // L-ийг динамикаар импортлох
+    const L = require("leaflet");
+    return new L.Icon({
+      iconUrl: "/icons/my-marker.png", // өөрийн icon path
+      iconSize: [32, 32], // icon хэмжээ
+      iconAnchor: [16, 32], // icon-ийн суурь цэг
+      popupAnchor: [0, -32],
+      shadowUrl: null,
+    });
+  }, []);
 
   return (
     <div className="relative w-full">
@@ -151,11 +261,56 @@ export default function Navbar() {
             {/* Right Section - Location + Navigation Icons */}
             <div className="flex items-center gap-6">
               {/* Location (Desktop) */}
-              <div className="hidden lg:flex items-center text-sm text-gray-600 cursor-pointer hover:text-gray-800 transition-colors">
+              <div
+                className="hidden lg:flex items-center text-sm text-gray-600 cursor-pointer hover:text-gray-800 transition-colors"
+                onClick={() => setShowMap(true)}
+                title="Байршлаа шинэчлэх"
+              >
                 <FaMapMarkerAlt className="h-4 w-4 mr-2" />
-                <span>Сүхбаатрын талбай...</span>
+                <span>{location}</span>
                 <FaChevronDown className="h-3 w-3 ml-1" />
               </div>
+
+              {/* Popup/modal дотор газрын зураг - Байршил сонгох */}
+              {showMap && (
+                <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+                  <div className="bg-white rounded-lg shadow-lg p-4 relative" style={{ width: 400, height: 340 }}>
+                    <button
+                      className="absolute top-2 right-2 text-gray-600 hover:text-red-600"
+                      onClick={() => setShowMap(false)}
+                    >
+                      ×
+                    </button>
+                    <MapContainer
+                      center={tempPosition}
+                      zoom={13}
+                      scrollWheelZoom={false}
+                      style={{ width: "100%", height: "250px" }}
+                    >
+                      <TileLayer
+                        attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                      />
+                      <Marker
+                        position={tempPosition}
+                        draggable={true}
+                        icon={customIcon}
+                        eventHandlers={{
+                          dragend: handleMarkerDrag,
+                        }}
+                      >
+                        <Popup>Маркерийг чирж байршлаа сонгоно уу</Popup>
+                      </Marker>
+                    </MapContainer>
+                    <button
+                      className="mt-3 w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                      onClick={handleConfirmLocation}
+                    >
+                      Байршлыг батлах
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Navigation Icons */}
               <div className="flex items-center gap-3">
@@ -165,11 +320,17 @@ export default function Navbar() {
                     <>
                       {!isAdmin && (
                         <>
-                          <Link href="/cart" className="p-2 text-gray-600 hover:text-green-600 transition-colors">
-                            <FaShoppingCart className="h-5 w-5" />
-                          </Link>
-                          <Link href="/orders" className="p-2 text-gray-600 hover:text-green-600 transition-colors">
-                            <FaClipboardList className="h-5 w-5" />
+                          {/* Cart icon хэсэг */}
+                          <Link href="/cart" className="relative p-2 bg-black rounded-2xl text-gray-600 hover:text-green-600 transition-colors min-w-[40px] flex justify-center items-center">
+                            {cartItems.length === 0 ? (
+                              // Cart хоосон үед зөвхөн icon харуулах
+                              <FaShoppingCart className="h-5 w-5" />
+                            ) : (
+                              // Cart-д бүтээгдэхүүн байгаа үед нийт үнэ харуулах
+                              <span className="text-xs text-white font-semibold select-none">
+                                Нийт үнэ: {cartTotal.toLocaleString()}₮
+                              </span>
+                            )}
                           </Link>
                         </>
                       )}
@@ -197,12 +358,12 @@ export default function Navbar() {
                           </span>
                         </>
                       )}
-                      <button
+                      {/* <button
                         onClick={handleLogout}
                         className="p-2 text-gray-600 hover:text-red-600 transition-colors"
                       >
                         <FaSignOutAlt className="h-5 w-5" />
-                      </button>
+                      </button> */}
                     </>
                   ) : (
                     <div className="flex items-center gap-3">

@@ -63,7 +63,12 @@ export default function Footer() {
           <h3 className="font-bold mb-2">Холбоо барих</h3>
           <p className="text-sm text-gray-600">
             Бидэнтэй холбогдох, санал хүсэлтээ үлдээх эсвэл асуух зүйлээ
-            бичээрэй.
+            <a
+              href="/company/support/feedback"
+              className="text-blue-600 hover:underline ml-1"
+            >
+              энд дарж илгээнэ үү.
+            </a>
           </p>
         </div>
 

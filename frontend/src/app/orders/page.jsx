@@ -75,7 +75,7 @@ export default function OrdersPage() {
           <Link href="#" className="flex items-center gap-2 text-gray-700 hover:text-black">
             <span>🔒</span> Нууц үг солих
           </Link>
-          <Link href="#" className="flex items-center gap-2 text-gray-700 hover:text-black">
+          <Link href="/company/support/faq" className="flex items-center gap-2 text-gray-700 hover:text-black">
             <span>❓</span> Тусламж
           </Link>
           <Link href="#" className="flex items-center gap-2 text-gray-700 hover:text-black">

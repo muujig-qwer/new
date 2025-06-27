@@ -16,7 +16,7 @@ export default function RootLayout({ children }) {
       <head>
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-montserrat bg-red-100">
+      <body className="font-montserrat bg-gray-100">
         <SessionProvider>
           <CartProvider>
             <WishlistProvider>

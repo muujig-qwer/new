@@ -40,55 +40,31 @@ export default function SupportTermsPage() {
         <div>
           <h1 className="text-2xl font-bold mb-4">Үйлчилгээний нөхцөл</h1>
           <div className="prose max-w-none">
-            <p>
-              Та “111” платформоос ямар нэгэн үйлчилгээ авах эсхүл бусад зорилгоор хэрэглэгчийн хаяг нээсэн болон нэвтэрсэн буюу манай апп-ийг татан авч ашигласнаар Таныг энэхүү үйлчилгээний нөхцөл түүний хавсралт, шинэчилсэн хувилбарыг хүлээн зөвшөөрсөн гэж үзэх тул анхааралтай уншиж танилцана уу.
-            </p>
-            <p>
-              Хэрэв та компани, нөхөрлөл, нийгэмлэг, төрийн байгууллага болон бусад байгууллага (“Байгууллага”)-ын өмнөөс “111” платформыг ашиглаж байгаа бол та төлөөлөх бүрэн эрхтэй бөгөөд танай Байгууллага энэхүү нөхцөл, болзлуудыг дагаж мөрдөхөө баталж байгаад тооцно. Энэ тохиолдолд “Хэрэглэгч” гэдэгт танай Байгууллагыг ойлгоно.
-            </p>
-            <p>
-              Та манай Үйлчилгээг авахын тулд 18 ба түүнээс дээш насанд хүрсэн байх шаардлагатай. Түүнчлэн холбогдох хуулийн дагуу манай Үйлчилгээг авах насны доод хязгаарт хүрээгүй тохиолдолд таны эцэг эх, асран хамгаалагч энэхүү Нөхцөл, болзлыг таны өмнөөс хүлээн зөвшөөрөх шаардлагатай гэдгийг анхаарна уу.
-            </p>
-            <p>
-              Хэрэглэгчийн өөрийн оруулсан хувийн мэдээлэл дээр үндэслэн архи, согтууруулах ундаа болон электрон тамхины ангиллын бүтээгдэхүүнийг худалдан авах насанд хүрсэн эсэхийг тодорхойлох бөгөөд 21 насанд хүрээгүй тохиолдолд “111”-ийн зүгээс худалдахгүй болохыг гэдгийг анхаарна уу.
-            </p>
-            <p>
-              Мөн та Үйлчилгээний нөхцөлийг хүлээн зөвшөөрөхгүй байж болох бөгөөд энэхүү тохиолдолд “111” нь ямар ч үйлчилгээг үзүүлэх боломжгүй юм.
-            </p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam euismod, urna eu tincidunt consectetur, nisi nisl aliquam enim, nec dictum nisi urna at sapien.</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque vitae velit ex. Mauris dapibus risus quis suscipit vulputate.</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque vitae velit ex. Mauris dapibus risus quis suscipit vulputate.</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque vitae velit ex. Mauris dapibus risus quis suscipit vulputate.</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque vitae velit ex. Mauris dapibus risus quis suscipit vulputate.</p>
             <h2 className="font-bold mt-4 mb-2">1. Ерөнхий нөхцөл</h2>
             <ul>
+              <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</li>
+              <li>Pellentesque vitae velit ex. Mauris dapibus risus quis suscipit vulputate.</li>
+              <li>Etiam euismod, urna eu tincidunt consectetur, nisi nisl aliquam enim.</li>
+              <li>Nunc pulvinar sapien et ligula ullamcorper malesuada proin libero nunc.</li>
+              <li>Quisque velit nisi, pretium ut lacinia in, elementum id enim.</li>
               <li>
-                1.1 “111” нь Фрэш Пак ХХК-ийн албан ёсны платформ бөгөөд энэхүү үйлчилгээний нөхцөл нь уг платформоор үйлчлүүлэх, бүтээгдэхүүн худалдах, түүнийг хүргэх, түгээхтэй холбоотой үүсэх бүхий л харилцааг зохицуулна.
-              </li>
-              <li>
-                1.2 Фрэш Пак ХХК нь Мерчант байгууллагын аливаа худалдааны баталгаа гаргахгүй бөгөөд бүтээгдэхүүний чанарын үнэн зөв, найдвартай байдлыг баталгаажуулах талаар ямар нэг алхам хийдэггүй болно.
-              </li>
-              <li>
-                1.3 “111” нь Мерчант байгууллагын бүтээгдэхүүн, үйлчилгээний мэдээллийг Хэрэглэгчдэд танилцуулах болон худалдан авалтыг цахимаар хийх боломжийг Хэрэглэгчид олгоно.
-              </li>
-              <li>
-                1.4 Хэрэглэгч нь “111” платформд нэвтэрч, бүртгүүлэхээс өмнө энэхүү Үйлчилгээний нөхцөлд тусгагдсан заалттай заавал танилцах үүрэгтэй бөгөөд хүлээн зөвшөөрсөн тохиолдолд “Би хүлээн зөвшөөрч байна.” гэсэн товчийг идэвхжүүлснээр Хэрэглэгч энэхүү үйлчилгээний нөхцөлийг бүрэн ойлгон хүлээн зөвшөөрсөнд тооцно. Хэрэв Хэрэглэгч нь өөрийн хайхрамжгүй байдал болон бусад шалтгааны улмаас Үйлчилгээний нөхцөлийг уншаагүй, бүрэн ойлгоогүй мэдээгүйгээр “Би хүлээн зөвшөөрч байна.” гэсэн товчийг идэвхжүүлсэн тохиолдолд Хэрэглэгчийг хүлээн зөвшөөрсөнтэй адил хууль эрх зүйн хувьд тооцох бөгөөд ямар нэгэн эрх, үүргээс чөлөөлөх үндэслэл болохгүй болно.
-              </li>
-              <li>
-                1.5 “111” платформын эх код, тэмдэгтүүд, нэр, лого болон бусад загварууд нь Монгол Улсын Оюуны Өмчийн тухай хууль, Зохиогчийн эрхийн тухай хууль болон Барааны тэмдэг, газар зүгийн заалтын тухай хуулийн дагуу Фрэш Пак ХХК-ийн өмч мөн бөгөөд бусад этгээд хуулбарлах, олшруулах, дуурайх, зөвшөөрөлгүй ашиглахыг хориглоно. Хэрэв энэхүү заалт зөрчигдсөн нь илэрсэн тохиолдолд Фрэш Пак ХХК нь өөрт учирсан бүхий л хохирол зардлаа нэхэмжлэн хуулийн дагуу арга хэмжээ авна.
-              </li>
-              <li>
-                1.6 Үйлчилгээний нөхцөлд хэрэглэсэн дараах нэр томьёог дор дурдсан утгаар ойлгоно.
                 <ul>
-                  <li>111 – Цахимаар худалдан авалт хийх үйлчилгээг үзүүлж буй платформ;</li>
-                  <li>Хэрэглэгч - “111”-р үйлчлүүлж буй иргэний эрх зүйн бүрэн чадамжтай иргэн;</li>
-                  <li>Мерчант - Бүтээгдэхүүн борлуулах болон үйлчилгээ үзүүлэх албан ёсны эрхтэй хуулийн этгээд болон хувь хүн;</li>
-                  <li>Шоппер – Хэрэглэгчийн захиалгыг биелүүлэх буюу цуглуулан бэлтгэх Фрэш Пак ХХК-ийн ажилтан;</li>
-                  <li>Хүргэлтийн ажилтан - Хэрэглэгчийн захиалгыг хүргэх Фрэш Пак ХХК-ийн өөрийн болон туслан гүйцэтгэгч;</li>
-                  <li>Хэтэвч – Захиалага цуцлах, төлбөрийн зөрүүнээс үүссэн мөнгөн буцаалтыг шилжүүлэх болон бэлгийн карт цэнэглэх зорилгоор ашиглагдах “111” платформын төлбөрийн хэрэгсэл.</li>
+                  <li>Lorem – Lorem ipsum dolor sit amet, consectetur adipiscing elit.</li>
+                  <li>Ipsum – Pellentesque vitae velit ex. Mauris dapibus risus quis suscipit vulputate.</li>
+                  <li>Dolor – Etiam euismod, urna eu tincidunt consectetur, nisi nisl aliquam enim.</li>
+                  <li>Sit – Nunc pulvinar sapien et ligula ullamcorper malesuada proin libero nunc.</li>
+                  <li>Amet – Quisque velit nisi, pretium ut lacinia in, elementum id enim.</li>
                 </ul>
               </li>
             </ul>
             <h2 className="font-bold mt-4 mb-2">2. Хэрэглэгчийн бүртгэл</h2>
             <ul>
-              <li>
-                2.1 “111”-д Хэрэглэгчээр бүртгүүлэх тохиолдолд та өөрийн овог, нэр, төрсөн он, сар, өдөр, хүйс, утасны дугаар зэрэг хувийн мэдээллээ оруулснаар хэрэглэгчийн бүртгэл үүснэ.
-              </li>
+              <li>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</li>
             </ul>
           </div>
         </div>
@@ -101,46 +77,32 @@ export default function SupportTermsPage() {
           <div className="prose max-w-none">
             <ul className="space-y-4">
               <li>
-                <strong>1. Бөөндье - Дараа төлөх нөхцөл</strong>
-                <div>
-                  Та борлуулалтын албатай холбогдон бүтээгдэхүүн нийлүүлэх гэрээ хийсний үндсэн дээр сар бүрийн 15-ний өдөр тооцоо нийлэх нөхцөлтэйгөөр хүссэн бараагаа, хүссэн хэмжээгээрээ захиалан авах боломжтой.
-                </div>
+                <strong>1. Lorem ipsum dolor sit amet?</strong>
+                <div>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam euismod, urna eu tincidunt consectetur.</div>
               </li>
               <li>
-                <strong>2. Хэтэвч доторх мөнгөө хэрхэн ашиглах вэ?</strong>
-                <div>
-                  Та захиалга үүсгэн төлбөр төлөх хэсгээс хэтэвч доторх мөнгөө ашиглан төлбөрөө төлөх гэсэн сонголтыг сонгон төлөх боломжтой.
-                </div>
+                <strong>2. Pellentesque vitae velit ex?</strong>
+                <div>Pellentesque vitae velit ex. Mauris dapibus risus quis suscipit vulputate.</div>
               </li>
               <li>
-                <strong>3. Захиалгын явцаа хэрхэн харах вэ?</strong>
-                <div>
-                  Аппликейшны захиалга цэсээс өөрийн захиалгын төлөвийг хянах боломжтой.
-                </div>
+                <strong>3. Etiam euismod urna eu?</strong>
+                <div>Etiam euismod, urna eu tincidunt consectetur, nisi nisl aliquam enim.</div>
               </li>
               <li>
-                <strong>4. Бэлгийн карт хэрхэн ашиглах вэ?</strong>
-                <div>
-                  Профайл цэс рүү орон бэлгийн карт ашиглах цонхонд тусгай дугаарыг оруулан ашиглах боломжтой.
-                </div>
+                <strong>4. Nunc pulvinar sapien?</strong>
+                <div>Nunc pulvinar sapien et ligula ullamcorper malesuada proin libero nunc.</div>
               </li>
               <li>
-                <strong>5. Захиалгын зөрүү төлбөрөө хэрхэн төлөх вэ?</strong>
-                <div>
-                  Төлбөрийн зөрүү үүссэн тохиолдолд захиалга цэс рүү орох үед зөрүү төлбөр төлөх хэсэг харагдана.
-                </div>
+                <strong>5. Quisque velit nisi?</strong>
+                <div>Quisque velit nisi, pretium ut lacinia in, elementum id enim.</div>
               </li>
               <li>
-                <strong>6. Нэхэмжлэлээр хэрхэн төлөх вэ?</strong>
-                <div>
-                  Та захиалга үүсгэн төлбөр төлөх хэсэгт нэхэмжлэлээр төлөх сонголтыг сонгосноор нэхэмжлэл үүснэ.
-                </div>
+                <strong>6. Mauris dapibus risus?</strong>
+                <div>Mauris dapibus risus quis suscipit vulputate.</div>
               </li>
               <li>
-                <strong>7. И-баримтаа хэрхэн авах вэ?</strong>
-                <div>
-                  Захиалга бүрийн дараа и-баримт авах боломжтой бөгөөд профайл цэсээс эсвэл захиалгын дэлгэрэнгүйгээс татаж авах боломжтой.
-                </div>
+                <strong>7. Consectetur adipiscing elit?</strong>
+                <div>Consectetur adipiscing elit. Pellentesque vitae velit ex.</div>
               </li>
             </ul>
           </div>
@@ -152,7 +114,60 @@ export default function SupportTermsPage() {
         <div>
           <h1 className="text-2xl font-bold mb-4">Нууцлалын бодлого</h1>
           <div className="prose max-w-none">
-            <p>Тун удахгүй нэмэгдэнэ...</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam euismod, urna eu tincidunt consectetur, nisi nisl aliquam enim, nec dictum nisi urna at sapien.</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque vitae velit ex. Mauris dapibus risus quis suscipit vulputate.</p>
+            <h2 className="font-bold mt-4 mb-2">1. Нэр томьёоны тодорхойлолт</h2>
+            <ul>
+              <li><strong>Lorem</strong> – Lorem ipsum dolor sit amet, consectetur adipiscing elit.</li>
+              <li><strong>Ipsum</strong> – Pellentesque vitae velit ex. Mauris dapibus risus quis suscipit vulputate.</li>
+              <li><strong>Dolor</strong> – Etiam euismod, urna eu tincidunt consectetur, nisi nisl aliquam enim.</li>
+              <li><strong>Sit</strong> – Nunc pulvinar sapien et ligula ullamcorper malesuada proin libero nunc.</li>
+              <li><strong>Amet</strong> – Quisque velit nisi, pretium ut lacinia in, elementum id enim.</li>
+            </ul>
+            <h2 className="font-bold mt-4 mb-2">2. Цуглуулж буй мэдээлэл</h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque vitae velit ex.</p>
+            <ul>
+              <li>Lorem ipsum</li>
+              <li>Dolor sit amet</li>
+              <li>Consectetur adipiscing</li>
+              <li>Elit Pellentesque</li>
+              <li>Vitae velit ex</li>
+              <li>Mauris dapibus risus</li>
+              <li>Nunc pulvinar sapien et ligula ullamcorper malesuada proin libero nunc.</li>
+            </ul>
+            <h2 className="font-bold mt-4 mb-2">3. Мэдээллийг хэрхэн ашигладаг вэ?</h2>
+            <ul>
+              <li>Lorem ipsum dolor sit amet</li>
+              <li>Consectetur adipiscing elit</li>
+              <li>Pellentesque vitae velit ex</li>
+              <li>Mauris dapibus risus quis suscipit</li>
+              <li>Vulputate et, pretium ut lacinia</li>
+              <li>Elementum id enim</li>
+            </ul>
+            <h2 className="font-bold mt-4 mb-2">4. Гуравдагч этгээдийн үйлчилгээ ба мэдээлэл хуваалцах</h2>
+            <ul>
+              <li>Lorem ipsum dolor sit amet</li>
+              <li>Consectetur adipiscing elit</li>
+            </ul>
+            <h2 className="font-bold mt-4 mb-2">5. Мэдээллийг хадгалах хугацаа</h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque vitae velit ex. Mauris dapibus risus quis suscipit vulputate.</p>
+            <h2 className="font-bold mt-4 mb-2">6. Таны эрх</h2>
+            <ul>
+              <li>Lorem ipsum dolor sit amet</li>
+              <li>Consectetur adipiscing elit</li>
+              <li>Pellentesque vitae velit ex</li>
+            </ul>
+            <h2 className="font-bold mt-4 mb-2">7. Аюулгүй байдлын арга хэмжээ</h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque vitae velit ex.</p>
+            <h2 className="font-bold mt-4 mb-2">8. Хүүхдийн нууцлал</h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque vitae velit ex.</p>
+            <h2 className="font-bold mt-4 mb-2">9. Өөрчлөлт оруулах эрх</h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque vitae velit ex.</p>
+            <h2 className="font-bold mt-4 mb-2">10. Холбоо барих</h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.<br />
+              Pellentesque vitae velit ex.<br />
+              Mauris dapibus risus quis suscipit vulputate.
+            </p>
           </div>
         </div>
       )}

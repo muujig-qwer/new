@@ -33,86 +33,85 @@ export default function PrivacyPage() {
       <h1 className="text-2xl font-bold mb-4">Нууцлалын бодлого</h1>
       <div className="prose max-w-none">
         <p>
-          <strong>FreshPack</strong> (“бид,” “манай” эсвэл “бидэн”) нь таны хувийн мэдээллийг хамгаалах үүрэг хүлээдэг. Энэхүү Нууцлалын бодлого нь таны хувийн мэдээллийг хэрхэн цуглуулж, ашиглаж, задруулж байгааг тайлбарлана.
+          <strong>Lorem Ipsum</strong> dolor sit amet, consectetur adipiscing elit. Etiam euismod, urna eu tincidunt consectetur, nisi nisl aliquam enim, nec dictum nisi urna at sapien.
         </p>
         <p>
-          Энэхүү Нууцлалын бодлого нь манай вэбсайт, түүний дэд домэйнууд (“Үйлчилгээ”) болон манай FreshPack аппликэйшнтэй холбогдсон бүх талбарт хамаарна. Та манай Үйлчилгээнд нэвтэрч, ашигласнаар энэхүү Нууцлалын бодлого болон манай Үйлчилгээний нөхцлийг хүлээн зөвшөөрч буйгаа илэрхийлж байна.
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque vitae velit ex. Mauris dapibus risus quis suscipit vulputate.
         </p>
         <h2 className="font-bold mt-4 mb-2">1. Нэр томьёоны тодорхойлолт</h2>
         <ul>
           <li>
-            <strong>Күүки</strong> – Вэбсайт ашиглах явцад таны хөтчид хадгалагддаг бага хэмжээний мэдээлэл. Үүнийг таны хөтчийг таних, аналитик мэдээлэл цуглуулах, хэлний тохиргоо эсвэл нэвтрэх мэдээллийг сануулахад ашигладаг.
+            <strong>Lorem</strong> – Lorem ipsum dolor sit amet, consectetur adipiscing elit.
           </li>
           <li>
-            <strong>Компанийн</strong> – “Компанийн,” “бид,” “манай,” эсвэл “бидэн” гэдэг нь энэхүү Нууцлалын бодлогод дурдагдсан FreshPack LLC (хаяг: F14, Central Park, 19 Chinggis Avenue, SBD-1, Улаанбаатар 1424, Монгол) компанийг илэрхийлнэ.
+            <strong>Ipsum</strong> – Pellentesque vitae velit ex. Mauris dapibus risus quis suscipit vulputate.
           </li>
           <li>
-            <strong>Хэрэглэгч</strong> – FreshPack Үйлчилгээнд бүртгүүлсэн, ашиглаж буй хувь хүн эсвэл байгууллага.
+            <strong>Dolor</strong> – Etiam euismod, urna eu tincidunt consectetur, nisi nisl aliquam enim.
           </li>
           <li>
-            <strong>Хувийн мэдээлэл</strong> – Хувь хүнийг шууд болон шууд бусаар таних боломжтой мэдээлэл (жишээ нь: нэр, утасны дугаар, имэйл хаяг).
+            <strong>Sit</strong> – Nunc pulvinar sapien et ligula ullamcorper malesuada proin libero nunc.
           </li>
           <li>
-            <strong>Гуравдагч этгээдийн үйлчилгээ</strong> – Манай контентыг хүргэх эсвэл таны сонирхолд нийцсэн бүтээгдэхүүн, үйлчилгээг санал болгодог гуравдагч этгээд.
+            <strong>Amet</strong> – Quisque velit nisi, pretium ut lacinia in, elementum id enim.
           </li>
         </ul>
         <h2 className="font-bold mt-4 mb-2">2. Цуглуулж буй мэдээлэл</h2>
-        <p>Бид дараах төрлийн мэдээллийг цуглуулж болно:</p>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque vitae velit ex.</p>
         <ul>
-          <li>Нэр, хэрэглэгчийн нэр</li>
-          <li>Утасны дугаар</li>
-          <li>Имэйл хаяг</li>
-          <li>Төлбөрийн картын дугаар</li>
-          <li>Нас</li>
-          <li>Нууц үг</li>
+          <li>Lorem ipsum</li>
+          <li>Dolor sit amet</li>
+          <li>Consectetur adipiscing</li>
+          <li>Elit Pellentesque</li>
+          <li>Vitae velit ex</li>
+          <li>Mauris dapibus risus</li>
           <li>
-            Гар утаснаас цуглуулах мэдээлэл (заавал биш):<br />
-            Зургийн сан: Зураг оруулахын тулд таны утасны зургийн санд хандах зөвшөөрөл шаардагдана. Хэрэв та энэ эрхийг өгөхгүй бол манай аппликейшн хэвийн ажиллана.
+            Nunc pulvinar sapien et ligula ullamcorper malesuada proin libero nunc.
           </li>
         </ul>
         <h2 className="font-bold mt-4 mb-2">3. Мэдээллийг хэрхэн ашигладаг вэ?</h2>
         <ul>
-          <li>Хэрэглэгчийн туршлагыг хувийн болгох</li>
-          <li>Үйлчилгээг сайжруулах</li>
-          <li>Хэрэглэгчийн дэмжлэгийг сайжруулах</li>
-          <li>Гүйлгээ боловсруулах</li>
-          <li>Сурталчилгаа, санал асуулга зохион байгуулах</li>
-          <li>Имэйл илгээх</li>
+          <li>Lorem ipsum dolor sit amet</li>
+          <li>Consectetur adipiscing elit</li>
+          <li>Pellentesque vitae velit ex</li>
+          <li>Mauris dapibus risus quis suscipit</li>
+          <li>Vulputate et, pretium ut lacinia</li>
+          <li>Elementum id enim</li>
         </ul>
         <h2 className="font-bold mt-4 mb-2">4. Гуравдагч этгээдийн үйлчилгээ ба мэдээлэл хуваалцах</h2>
         <ul>
-          <li>Үйлчилгээг хүргэхийн тулд итгэмжлэгдсэн гуравдагч талтай хамтрах</li>
-          <li>Хууль, эрх зүйн шаардлага биелүүлэх</li>
+          <li>Lorem ipsum dolor sit amet</li>
+          <li>Consectetur adipiscing elit</li>
         </ul>
         <h2 className="font-bold mt-4 mb-2">5. Мэдээллийг хадгалах хугацаа</h2>
         <p>
-          Бид таны мэдээллийг зөвхөн шаардлагатай хугацаанд хадгална. Хэрэгцээ дууссан тохиолдолд бид таны мэдээллийг системээс устгах буюу хувийн мэдээллийг илэрхийлэхгүй хэлбэрт шилжүүлнэ.
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque vitae velit ex. Mauris dapibus risus quis suscipit vulputate.
         </p>
         <h2 className="font-bold mt-4 mb-2">6. Таны эрх</h2>
         <ul>
-          <li>Хувийн мэдээллээ шинэчлэх, залруулах</li>
-          <li>Харилцааны тохиргоогоо өөрчлөх</li>
-          <li>Өөрийн мэдээллийг устгах хүсэлт гаргах</li>
+          <li>Lorem ipsum dolor sit amet</li>
+          <li>Consectetur adipiscing elit</li>
+          <li>Pellentesque vitae velit ex</li>
         </ul>
         <h2 className="font-bold mt-4 mb-2">7. Аюулгүй байдлын арга хэмжээ</h2>
         <p>
-          Бид таны хувийн мэдээллийг хамгаалахын тулд зохих физик, техникийн, удирдлагын арга хэмжээг авдаг. Гэвч интернетийн орчинд мэдээллийн бүрэн аюулгүй байдлыг баталгаажуулах боломжгүйг анхаарна уу.
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque vitae velit ex.
         </p>
         <h2 className="font-bold mt-4 mb-2">8. Хүүхдийн нууцлал</h2>
         <p>
-          Манай Үйлчилгээ нь 13-аас доош насны хүүхдүүдэд зориулагдаагүй. Хэрэв эцэг эх эсвэл асран хамгаалагч нь хүүхэд нь хувийн мэдээллээ өгсөн талаар мэдсэн бол бидэнтэй холбогдож мэдээллийг устгуулах боломжтой.
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque vitae velit ex.
         </p>
         <h2 className="font-bold mt-4 mb-2">9. Өөрчлөлт оруулах эрх</h2>
         <p>
-          Бид энэхүү Нууцлалын бодлогыг үе үе шинэчлэх эрхтэй. Шинэчлэлтийн тухай мэдээллийг манай Үйлчилгээгээр дамжуулан мэдэгдэнэ. Шинэчлэхээс өмнө та бодлогыг дахин хянаж үзэх боломжтой.
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque vitae velit ex.
         </p>
         <h2 className="font-bold mt-4 mb-2">10. Холбоо барих</h2>
         <p>
-          Энэхүү Нууцлалын бодлогын талаар тодруулга авах эсвэл мэдээллээ шинэчлэх хүсэлтэй бол дараах хаягаар холбогдоно уу:<br />
-          FreshPack LLC<br />
-          Хаяг: F14, Central Park, 19 Chinggis Avenue, SBD-1, Улаанбаатар 1424, Монгол<br />
-          Имэйл: support@freshpack.mn
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit.<br />
+          Pellentesque vitae velit ex.<br />
+          Mauris dapibus risus quis suscipit vulputate.
         </p>
       </div>
     </div>
-  )};
+  );
+}

@@ -15,7 +15,7 @@ export default function FavoritesPage() {
         <p className="text-gray-400">Нүүр хуудас · <span className="text-black font-medium">Хүслийн жагсаалт</span></p>
 
         <nav className="flex flex-col gap-3 mt-4">
-          <Link href="#" className="flex items-center gap-2 text-gray-700 hover:text-black">
+          <Link href="/profile" className="flex items-center gap-2 text-gray-700 hover:text-black">
             <span>👤</span> Миний мэдээлэл
           </Link>
           <Link href="#" className="flex items-center gap-2 text-gray-700 hover:text-black">
@@ -33,10 +33,10 @@ export default function FavoritesPage() {
           <Link href="#" className="flex items-center gap-2 text-gray-700 hover:text-black">
             <span>🔒</span> Нууц үг солих
           </Link>
-          <Link href="#" className="flex items-center gap-2 text-gray-700 hover:text-black">
+          <Link href="/company/support/faq" className="flex items-center gap-2 text-gray-700 hover:text-black">
             <span>❓</span> Тусламж
           </Link>
-          <Link href="#" className="flex items-center gap-2 text-gray-700 hover:text-black">
+          <Link href="/" className="flex items-center gap-2 text-gray-700 hover:text-black">
             <span>🚪</span> Гарах
           </Link>
         </nav>

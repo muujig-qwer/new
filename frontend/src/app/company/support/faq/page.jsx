@@ -4,32 +4,32 @@ import { useRouter } from "next/navigation";
 
 const faqs = [
 	{
-		q: "Бөөндье - Дараа төлөх нөхцөл",
-		a: "Та борлуулалтын албатай холбогдон бүтээгдэхүүн нийлүүлэх гэрээ хийсний үндсэн дээр сар бүрийн 15-ний өдөр тооцоо нийлэх нөхцөлтэйгөөр хүссэн бараагаа, хүссэн хэмжээгээрээ захиалан авах боломжтой.",
+		q: "Lorem ipsum dolor sit amet?",
+		a: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam euismod, urna eu tincidunt consectetur.",
 	},
 	{
-		q: "Хэтэвч доторх мөнгөө хэрхэн ашиглах вэ?",
-		a: "Та захиалга үүсгэн төлбөр төлөх хэсгээс хэтэвч доторх мөнгөө ашиглан төлбөрөө төлөх гэсэн сонголтыг сонгон төлөх боломжтой.",
+		q: "Pellentesque vitae velit ex?",
+		a: "Pellentesque vitae velit ex. Mauris dapibus risus quis suscipit vulputate.",
 	},
 	{
-		q: "Захиалгын явцаа хэрхэн харах вэ?",
-		a: "Аппликейшны захиалга цэсээс өөрийн захиалгын төлөвийг хянах боломжтой.",
+		q: "Etiam euismod urna eu?",
+		a: "Etiam euismod, urna eu tincidunt consectetur, nisi nisl aliquam enim.",
 	},
 	{
-		q: "Бэлгийн карт хэрхэн ашиглах вэ?",
-		a: "Профайл цэс рүү орон бэлгийн карт ашиглах цонхонд тусгай дугаарыг оруулан ашиглах боломжтой.",
+		q: "Nunc pulvinar sapien?",
+		a: "Nunc pulvinar sapien et ligula ullamcorper malesuada proin libero nunc.",
 	},
 	{
-		q: "Захиалгын зөрүү төлбөрөө хэрхэн төлөх вэ?",
-		a: "Төлбөрийн зөрүү үүссэн тохиолдолд захиалга цэс рүү орох үед зөрүү төлбөр төлөх хэсэг харагдана.",
+		q: "Quisque velit nisi?",
+		a: "Quisque velit nisi, pretium ut lacinia in, elementum id enim.",
 	},
 	{
-		q: "Нэхэмжлэлээр хэрхэн төлөх вэ?",
-		a: "Та захиалга үүсгэн төлбөр төлөх хэсэгт нэхэмжлэлээр төлөх сонголтыг сонгосноор нэхэмжлэл үүснэ.",
+		q: "Mauris dapibus risus?",
+		a: "Mauris dapibus risus quis suscipit vulputate.",
 	},
 	{
-		q: "И-баримтаа хэрхэн авах вэ?",
-		a: "Захиалга бүрийн дараа и-баримт авах боломжтой бөгөөд профайл цэсээс эсвэл захиалгын дэлгэрэнгүйгээс татаж авах боломжтой.",
+		q: "Consectetur adipiscing elit?",
+		a: "Consectetur adipiscing elit. Pellentesque vitae velit ex.",
 	},
 ];
 
@@ -47,8 +47,10 @@ export default function FaqPage() {
 				>
 					Үйлчилгээний нөхцөл
 				</button>
-				<button className="px-4 py-2 rounded font-semibold border bg-blue-600 text-white border-blue-600"
-                        onClick={() => router.push("/company/support/faq")}>
+				<button
+					className="px-4 py-2 rounded font-semibold border bg-blue-600 text-white border-blue-600"
+					onClick={() => router.push("/company/support/faq")}
+				>
 					Түгээмэл асуулт & хариулт
 				</button>
 				<button
