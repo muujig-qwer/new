@@ -108,7 +108,7 @@ export default function HomePage() {
                 }
                 className="text-sm text-blue-500 hover:underline"
               >
-                Дэлгэрэнгүй
+                Бүгд
               </Link>
             </div>
             <BrandProductSlider products={products} showViewAll={true} />

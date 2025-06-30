@@ -207,6 +207,13 @@ export default function Navbar() {
     });
   }, []);
 
+  useEffect(() => {
+    // Байршил өөрчлөгдөх бүрт localStorage-д хадгална
+    if (location && location !== "Сүхбаатрын талбай...") {
+      localStorage.setItem("user_location", location);
+    }
+  }, [location]);
+
   return (
     <div className="relative w-full">
       {/* Main Navbar */}
@@ -321,13 +328,19 @@ export default function Navbar() {
                       {!isAdmin && (
                         <>
                           {/* Cart icon хэсэг */}
-                          <Link href="/cart" className="relative p-2 bg-black rounded-2xl text-gray-600 hover:text-green-600 transition-colors min-w-[40px] flex justify-center items-center">
+                          <Link
+                            href="/cart"
+                            className={`relative p-2 rounded-2xl transition-colors min-w-[40px] flex justify-center items-center
+                              bg-white
+                              ${cartItems.length === 0 ? "text-gray-600" : "text-black"}
+                            `}
+                          >
                             {cartItems.length === 0 ? (
-                              // Cart хоосон үед зөвхөн icon харуулах
+                              // Cart хоосон үед саарал icon
                               <FaShoppingCart className="h-5 w-5" />
                             ) : (
-                              // Cart-д бүтээгдэхүүн байгаа үед нийт үнэ харуулах
-                              <span className="text-xs text-white font-semibold select-none">
+                              // Cart-д бүтээгдэхүүн байгаа үед нийт үнэ харуулах (хар текст)
+                              <span className="text-xs font-semibold select-none">
                                 Нийт үнэ: {cartTotal.toLocaleString()}₮
                               </span>
                             )}

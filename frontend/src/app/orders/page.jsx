@@ -3,12 +3,15 @@ import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 import axios from "axios"
 import Link from "next/link"
+import { FaTrash } from "react-icons/fa"
+import { useRouter } from "next/navigation"
 
 export default function OrdersPage() {
   const { data: session, status } = useSession()
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const router = useRouter()
 
   useEffect(() => {
     if (!session) return
@@ -26,6 +29,16 @@ export default function OrdersPage() {
     }
     fetchOrders()
   }, [session])
+
+  const handleDeleteOrder = async (orderId) => {
+    if (!window.confirm("Энэ захиалгыг устгах уу?")) return
+    try {
+      await axios.delete(`http://localhost:5000/api/orders/${orderId}`)
+      setOrders((prev) => prev.filter((o) => o._id !== orderId))
+    } catch (err) {
+      alert("Захиалга устгахад алдаа гарлаа")
+    }
+  }
 
   if (status === "loading" || loading) {
     return (
@@ -86,9 +99,19 @@ export default function OrdersPage() {
 
       {/* Orders Section */}
       <section className="flex-1 bg-white rounded-xl shadow p-6">
-        <h1 className="text-2xl font-bold mb-6 flex items-center gap-3">
-          <span className="text-3xl">🧾</span> Миний захиалгууд
-        </h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold flex items-center gap-3">
+            <span className="text-3xl">🧾</span> Миний захиалгууд
+          </h1>
+          {orders.length > 0 && (
+            <button
+              className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold"
+              onClick={() => router.push("/checkoutpayment")}
+            >
+              Бүх захиалгыг баталгаажуулах
+            </button>
+          )}
+        </div>
 
         {orders.length === 0 ? (
           <div className="text-center py-16 text-gray-400 bg-gray-50 rounded-xl shadow-inner">
@@ -102,7 +125,16 @@ export default function OrdersPage() {
                   <div className="text-gray-800 font-semibold">
                     Захиалгын дугаар: <span className="font-mono text-blue-600">{order._id.slice(-6).toUpperCase()}</span>
                   </div>
-                  <div className="text-xs text-gray-500">{new Date(order.createdAt).toLocaleString()}</div>
+                  <div className="flex items-center gap-2">
+                    <div className="text-xs text-gray-500">{new Date(order.createdAt).toLocaleString()}</div>
+                    <button
+                      onClick={() => handleDeleteOrder(order._id)}
+                      className="ml-2 text-red-600 hover:text-red-800 p-1 rounded transition"
+                      title="Захиалга устгах"
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3 mb-3">

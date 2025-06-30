@@ -28,34 +28,14 @@ export default function CartPage() {
     0
   );
 
-  // Захиалга хийх
-  const handleOrder = async () => {
+  // Захиалга хийх товч дарахад checkoutpayment page рүү шилжих
+  const handleOrder = () => {
     if (!session) {
       alert("Зөвхөн нэвтэрсэн хэрэглэгч захиалга хийх боломжтой.");
       router.push("/login");
       return;
     }
-
-    try {
-      const products = cartItems.map((item) => ({
-        product: item._id,
-        quantity: item.quantity,
-        size: item.size,
-      }));
-
-      await axios.post(
-        "http://localhost:5000/api/orders",
-        {
-          products,
-          totalPrice: total,
-          email: session.user.email, // Google login хэрэглэгчийн email
-        }
-      );
-      clearCart();
-      router.push("/orders");
-    } catch (err) {
-      alert("Захиалга үүсгэхэд алдаа гарлаа");
-    }
+    router.push("/checkoutpayment");
   };
 
   if (status === "loading") {

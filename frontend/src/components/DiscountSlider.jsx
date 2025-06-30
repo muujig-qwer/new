@@ -8,10 +8,12 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight, Heart } from "lucide-react";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext"; // cart context байгаа бол
+import { useNotification } from "@/context/NotificationContext";
 
 export default function DiscountSlider({ products }) {
   const { wishlist, addToWishlist, removeFromWishlist } = useWishlist();
   const { addToCart } = useCart();
+  const { showNotification } = useNotification(); // notification context-оос авна
 
   // Зөвхөн хямдралтай бараануудыг шүүнэ
   const discountedProducts = products
@@ -134,7 +136,10 @@ export default function DiscountSlider({ products }) {
                     {/* Add to Cart Button */}
                     <button
                       className="w-full bg-blue-600 text-white py-2 rounded mt-2 hover:bg-blue-700 transition"
-                      onClick={() => addToCart(product)}
+                      onClick={() => {
+                        addToCart(product);
+                        showNotification(product); // notification харуулах
+                      }}
                     >
                       🛒 Сагслах
                     </button>

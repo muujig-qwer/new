@@ -8,6 +8,7 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight, Heart, Star, Clock, Home } from "lucide-react";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext";
+import { useNotification } from "@/context/NotificationContext";
 
 export default function BrandProductSlider({ 
   brand, 
@@ -17,6 +18,7 @@ export default function BrandProductSlider({
 }) {
   const { wishlist, addToWishlist, removeFromWishlist } = useWishlist();
   const { addToCart } = useCart();
+  const { showNotification } = useNotification(); // notification context-оос авна
 
   if (!products || products.length === 0) return null;
 
@@ -145,7 +147,10 @@ export default function BrandProductSlider({
                     {/* Add to Cart Button */}
                     <button
                       className="w-full bg-blue-600 text-white py-2 rounded mt-2 hover:bg-blue-700 transition"
-                      onClick={() => addToCart(product)}
+                      onClick={() => {
+                        addToCart(product);
+                        showNotification(product); // notification харуулах
+                      }}
                     >
                       🛒 Сагслах
                     </button>

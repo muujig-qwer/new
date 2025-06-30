@@ -28,11 +28,26 @@ export const createOrder = async (req, res) => {
 
     await order.save()
 
-    // Жишээ: захиалга баталгаажих үед
-    await Product.updateOne(
-      { _id: productId, "stock.size": size, "stock.color": color },
-      { $inc: { "stock.$.quantity": -orderQuantity } }
-    );
+    // Захиалсан бүтээгдэхүүн бүрийн үлдэгдлийг хасах
+    for (const item of products) {
+      const { product: productId, size, color, quantity } = item;
+      const product = await Product.findById(productId);
+      if (!product) continue; // эсвэл алдаа буцааж болно
+
+      // stock дотор тохирох size, color байгаа эсэхийг шалгана
+      const stockIndex = product.stock.findIndex(
+        (s) => s.size === size && s.color === color
+      );
+      if (stockIndex === -1) {
+        // тохирох stock байхгүй бол алдаа буцаах эсвэл continue
+        // return res.status(400).json({ message: `Барааны үлдэгдэл олдсонгүй: ${product.name} (${size}, ${color})` });
+        continue;
+      }
+
+      // update хийх
+      product.stock[stockIndex].quantity -= quantity;
+      await product.save();
+    }
 
     res.status(201).json(order)
   } catch (err) {
