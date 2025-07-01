@@ -366,6 +366,10 @@ export default function Navbar() {
                           <Link href="/admin/dashboard" className="p-2 text-gray-600 hover:text-green-600 transition-colors">
                             <FaTachometerAlt className="h-5 w-5" />
                           </Link>
+                          <Link href="/admin/coupons" className="p-2 text-gray-600 hover:text-green-600 transition-colors">
+                            <FaGift className="h-5 w-5" />
+                            <span className="ml-1"></span>
+                          </Link>
                           <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
                             Админ
                           </span>
@@ -522,6 +526,13 @@ export default function Navbar() {
                       >
                         <FaClipboardList className="h-5 w-5 text-gray-600" />
                         <span>Захиалгууд</span>
+                      </Link>
+                      <Link
+                        href="/admin/coupons"
+                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-white transition-colors"
+                      >
+                        <FaGift className="h-5 w-5 text-gray-600" />
+                        <span>Купон үүсгэх</span>
                       </Link>
                     </>
                   )}

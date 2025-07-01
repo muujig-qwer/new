@@ -163,5 +163,18 @@ export const getUserByEmail = async (req, res) => {
   }
 };
 
+export const googleLogin = async (req, res) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) return res.status(401).json({ message: 'User not found' });
+  // JWT-д id, role, email-ийг хамтад нь хийж өгнө
+  const token = jwt.sign(
+    { id: user._id, role: user.role, email: user.email },
+    process.env.JWT_SECRET,
+    { expiresIn: '7d' }
+  );
+  res.json({ token });
+};
+
 
 

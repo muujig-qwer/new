@@ -1,5 +1,5 @@
 'use client'
-import { useSession } from "next-auth/react"
+import { useSession, signOut } from "next-auth/react"
 import Link from "next/link"
 
 export default function ProfilePage() {
@@ -43,8 +43,8 @@ export default function ProfilePage() {
           <Link href="/favorites" className="flex items-center gap-2 text-gray-700 hover:text-black">
             <span>💚</span> Хүслийн жагсаалт
           </Link>
-          <Link href="#" className="flex items-center gap-2 text-gray-700 hover:text-black">
-            <span>🔗</span> И-баримт холбох
+          <Link href="/profile/coupons" className="flex items-center gap-2 text-gray-700 hover:text-black">
+            <span>🎟️</span> Миний купон
           </Link>
           <Link href="#" className="flex items-center gap-2 text-gray-700 hover:text-black">
             <span>🔒</span> Нууц үг солих
@@ -52,7 +52,14 @@ export default function ProfilePage() {
           <Link href="/company/support/faq" className="flex items-center gap-2 text-gray-700 hover:text-black">
             <span>❓</span> Тусламж
           </Link>
-          <Link href="#" className="flex items-center gap-2 text-gray-700 hover:text-black">
+          <Link
+            href="#"
+            className="flex items-center gap-2 text-gray-700 hover:text-black"
+            onClick={(e) => {
+              e.preventDefault();
+              signOut({ callbackUrl: "/login" });
+            }}
+          >
             <span>🚪</span> Гарах
           </Link>
         </nav>

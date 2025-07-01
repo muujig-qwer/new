@@ -7,17 +7,17 @@ export default function AdminOrdersPage() {
 
   useEffect(() => {
     const fetchOrders = async () => {
-      const token = localStorage.getItem('token')
+      const token = localStorage.getItem('token');
       const res = await fetch('http://localhost:5000/api/orders/admin/orders', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      })
-      const data = await res.json()
-      setOrders(data)
-      setLoading(false)
-    }
-    fetchOrders()
+      });
+      const data = await res.json();
+      setOrders(data.orders || data || []);
+      setLoading(false);
+    };
+    fetchOrders();
   }, [])
 
   if (loading) return <div>Уншиж байна...</div>
@@ -36,7 +36,7 @@ export default function AdminOrdersPage() {
           </tr>
         </thead>
         <tbody>
-          {orders.map((order) => (
+          {(Array.isArray(orders) ? orders : []).map((order) => (
             <tr key={order._id}>
               <td className="border px-4 py-2">{order._id}</td>
               <td className="border px-4 py-2">{order.user?.name}</td>

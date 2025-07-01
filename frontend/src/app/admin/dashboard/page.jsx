@@ -1,58 +1,60 @@
-'use client'
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { jwtDecode } from 'jwt-decode'
-import axios from 'axios'
-import { BarChart3, Users, PackageCheck } from 'lucide-react'
+"use client";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { BarChart3, Users, PackageCheck } from "lucide-react";
 
 export default function AdminDashboard() {
-  const router = useRouter()
-  const [isAdmin, setIsAdmin] = useState(false)
-  const [stats, setStats] = useState({ products: 0, users: 0, orders: 0 })
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [stats, setStats] = useState({ products: 0, users: 0, orders: 0 });
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    if (!token) {
-      router.push('/login')
-      return
+    if (status === "loading") return;
+    // Хэрвээ нэвтрээгүй бол login руу, admin биш бол homepage руу буцаана
+    if (!session) {
+      router.replace("/login");
+      return;
     }
-    try {
-      const decoded = jwtDecode(token)
-      if (decoded.role === 'admin') {
-        setIsAdmin(true)
-      } else {
-        router.push('/')
-      }
-    } catch {
-      router.push('/login')
+    if (session.role !== "admin") {
+      router.replace("/");
+      return;
     }
-  }, [router])
+  }, [session, status, router]);
 
   useEffect(() => {
-    if (isAdmin) {
+    if (session?.accessToken && session.role === "admin") {
       const fetchStats = async () => {
         try {
           const [productsRes, usersRes, ordersRes] = await Promise.all([
-            axios.get('http://localhost:5000/api/products'),
-            axios.get('http://localhost:5000/api/auth/users', {
-              headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+            axios.get("http://localhost:5000/api/products"),
+            axios.get("http://localhost:5000/api/auth/users", {
+              headers: { Authorization: `Bearer ${session.accessToken}` },
             }),
-            axios.get('http://localhost:5000/api/orders', {
-              headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+            axios.get("http://localhost:5000/api/orders", {
+              headers: { Authorization: `Bearer ${session.accessToken}` },
             }),
-          ])
+          ]);
           setStats({
             products: productsRes.data.length,
             users: usersRes.data.length,
             orders: ordersRes.data.length,
-          })
+          });
         } catch (e) {}
-      }
-      fetchStats()
+      };
+      fetchStats();
     }
-  }, [isAdmin])
+  }, [session]);
 
-  if (!isAdmin) return <p className="mt-10 text-center">Ачааллаж байна...</p>
+  if (status === "loading" || !session) {
+    return <p className="mt-10 text-center">Ачааллаж байна...</p>;
+  }
+
+  // Зөвхөн admin үед dashboard-ийг харуулна
+  if (session.role !== "admin") {
+    return null;
+  }
 
   return (
     <div className="max-w-6xl mx-auto pt-32 px-6">
@@ -66,13 +68,11 @@ export default function AdminDashboard() {
           <p className="text-3xl font-bold">{stats.products}</p>
           <p className="mt-2 text-lg">Бүтээгдэхүүн</p>
         </div>
-
         <div className="bg-green-600 text-white p-6 rounded-2xl shadow-lg hover:scale-105 transition-transform duration-300">
           <Users className="h-10 w-10 mb-3" />
           <p className="text-3xl font-bold">{stats.users}</p>
           <p className="mt-2 text-lg">Хэрэглэгчид</p>
         </div>
-
         <div className="bg-yellow-500 text-white p-6 rounded-2xl shadow-lg hover:scale-105 transition-transform duration-300">
           <PackageCheck className="h-10 w-10 mb-3" />
           <p className="text-3xl font-bold">{stats.orders}</p>
@@ -82,7 +82,9 @@ export default function AdminDashboard() {
 
       <div className="grid sm:grid-cols-2 gap-6">
         <div className="bg-white border rounded-xl p-6 shadow hover:shadow-md transition">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800">Бүтээгдэхүүн нэмэх</h2>
+          <h2 className="text-xl font-semibold mb-4 text-gray-800">
+            Бүтээгдэхүүн нэмэх
+          </h2>
           <a
             href="/products/add"
             className="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
@@ -90,7 +92,6 @@ export default function AdminDashboard() {
             + Шинэ бүтээгдэхүүн
           </a>
         </div>
-
         <div className="bg-white border rounded-xl p-6 shadow hover:shadow-md transition">
           <h2 className="text-xl font-semibold mb-4 text-gray-800">Захиалгууд</h2>
           <a
@@ -102,5 +103,5 @@ export default function AdminDashboard() {
         </div>
       </div>
     </div>
-  )
+  );
 }

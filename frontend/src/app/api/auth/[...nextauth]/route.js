@@ -11,16 +11,33 @@ export const authOptions = {
   callbacks: {
     async jwt({ token, account }) {
       if (token.email === "muujig165@gmail.com") {
-        token.role = "admin"
+        token.role = "admin";
       } else {
-        token.role = "user"
+        token.role = "user";
       }
-      return token
+      return token;
     },
     async session({ session, token }) {
-      session.role = token.role
+      session.role = token.role;
 
-      // Backend-ээс хэрэглэгчийн _id-г авах
+      // 1. Backend-аас JWT авах
+      if (session.user?.email) {
+        try {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/google-login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: session.user.email }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            session.accessToken = data.token; // JWT-г session-д онооно
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+
+      // 2. Backend-ээс хэрэглэгчийн _id-г авах (хүсвэл үлдээж болно)
       if (session.user?.email) {
         try {
           const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/email/${session.user.email}`);
@@ -33,7 +50,7 @@ export const authOptions = {
         }
       }
 
-      return session
+      return session;
     },
   },
   secret: process.env.NEXTAUTH_SECRET,

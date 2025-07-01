@@ -7,6 +7,7 @@ import productRoutes from './routes/product.js';
 import categoryRoutes from './routes/category.js';
 import orderRoutes from './routes/order.js';
 import cartRoutes from './routes/cart.js';
+import couponRoutes from './routes/coupon.js';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -30,6 +31,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/cart', cartRoutes);
+app.use('/api/coupon', couponRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
