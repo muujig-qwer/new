@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
 import { jwtDecode } from 'jwt-decode'
+import { useSession } from "next-auth/react";
 
 const defaultSizes = ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45']
 // 10 default өнгө массив
@@ -20,6 +21,7 @@ const defaultColors = [
 ];
 
 export default function AddProductPage() {
+  const { data: session, status } = useSession();
   const [name, setName] = useState('')
   const [price, setPrice] = useState('')
   const [description, setDescription] = useState('')
@@ -39,22 +41,19 @@ export default function AddProductPage() {
   const router = useRouter()
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    if (!token) {
-      router.push('/login')
-      return
+    if (status === "loading") return;
+    if (!session?.accessToken) {
+      router.push('/login');
+      return;
     }
-    try {
-      const decoded = jwtDecode(token)
-      if (decoded.role === 'admin') {
-        setIsAdmin(true)
-      } else {
-        router.push('/')
-      }
-    } catch {
-      router.push('/login')
+    // Зөвхөн admin үед л isAdmin true болгоно
+    if (session?.user?.role === "admin") {
+      // admin эрхтэй
+      setIsAdmin(true);
+    } else if (session.user) {
+      router.push('/');
     }
-  }, [router])
+  }, [session, status, router])
 
   useEffect(() => {
     axios.get('http://localhost:5000/api/categories').then((res) => {
@@ -110,13 +109,11 @@ export default function AddProductPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const token = localStorage.getItem('token');
-    if (!token) {
+    if (!session?.accessToken) {
       alert('Нэвтэрч орно уу');
       router.push('/login');
       return;
     }
-
     try {
       const formData = new FormData();
       formData.append('name', name);
@@ -144,7 +141,7 @@ export default function AddProductPage() {
         formData,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${session.accessToken}`,
             'Content-Type': 'multipart/form-data',
           },
         }
@@ -154,7 +151,7 @@ export default function AddProductPage() {
     } catch (err) {
       alert('Алдаа гарлаа: ' + (err.response?.data?.message || 'Unknown error'));
     }
-  }
+  };
 
   if (!isAdmin) {
     return <p className="mt-10 text-center">Ачааллаж байна...</p>
@@ -366,4 +363,19 @@ export default function AddProductPage() {
       </form>
     </div>
   )
+}
+
+export const authOptions = {
+  // ... таны бусад тохиргоо
+  callbacks: {
+    async session({ session, token }) {
+      session.user.role = token.role; // JWT payload-оос role-г session.user-д онооно
+      session.accessToken = token.accessToken;
+      return session;
+    },
+    async jwt({ token, user }) {
+      if (user) token.role = user.role; // login үед user.role-ийг token-д онооно
+      return token;
+    }
+  }
 }

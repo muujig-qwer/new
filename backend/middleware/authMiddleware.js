@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken'
 import User from '../models/User.js'
 
 export const protect = async (req, res, next) => {
-  console.log("Authorization header:", req.headers.authorization); // ← энд нэмнэ
+  console.log("Authorization header:", req.headers.authorization);
   let token;
   if (
     req.headers.authorization &&
@@ -12,7 +12,8 @@ export const protect = async (req, res, next) => {
       token = req.headers.authorization.split(' ')[1]
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       console.log('decoded:', decoded);
-      req.user = await User.findById(decoded.id).select('-password')
+      const userId = decoded.id || decoded._id || decoded.sub;
+      req.user = await User.findById(userId).select('-password')
       console.log('req.user:', req.user)
       next()
     } catch (error) {

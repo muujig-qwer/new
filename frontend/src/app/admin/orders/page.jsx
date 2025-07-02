@@ -1,16 +1,18 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
 
 export default function AdminOrdersPage() {
+  const { data: session } = useSession();
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchOrders = async () => {
-      const token = localStorage.getItem('token');
+      if (!session?.accessToken) return;
       const res = await fetch('http://localhost:5000/api/orders/admin/orders', {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${session.accessToken}`,
         },
       });
       const data = await res.json();
@@ -18,7 +20,7 @@ export default function AdminOrdersPage() {
       setLoading(false);
     };
     fetchOrders();
-  }, [])
+  }, [session])
 
   if (loading) return <div>Уншиж байна...</div>
 

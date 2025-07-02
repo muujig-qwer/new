@@ -1,11 +1,15 @@
 "use client";
 import { useWishlist } from "@/context/WishlistContext";
+import { useCart } from "@/context/CartContext";
+import { useNotification } from "@/context/NotificationContext";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { Heart } from "lucide-react";
 
 export default function FavoritesPage() {
   const { wishlist, removeFromWishlist } = useWishlist();
+  const { addToCart } = useCart();
+  const { showNotification, notif } = useNotification(); // notification context-оос авна
   const { data: session } = useSession();
 
   return (
@@ -46,9 +50,6 @@ export default function FavoritesPage() {
       <section className="flex-1 bg-white rounded-xl shadow p-6">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-xl font-bold">Хүслийн жагсаалт</h1>
-          <button className="text-sm border px-4 py-2 rounded-full hover:bg-gray-100">
-            Дэлгүүрт зочлох →
-          </button>
         </div>
 
         {wishlist.length === 0 ? (
@@ -90,7 +91,13 @@ export default function FavoritesPage() {
                 </p>
 
                 {/* Add to Cart Button */}
-                <button className="w-full border bg-white text-sm py-2 rounded hover:bg-blue-50 transition">
+                <button
+                  className="w-full border bg-white text-sm py-2 rounded hover:bg-blue-50 transition"
+                  onClick={() => {
+                    addToCart({ ...product, quantity: 1 });
+                    showNotification(product); 
+                  }}
+                >
                   🛒 Сагслах
                 </button>
               </div>

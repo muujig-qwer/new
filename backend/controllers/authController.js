@@ -176,5 +176,23 @@ export const googleLogin = async (req, res) => {
   res.json({ token });
 };
 
+// Хэтэвчинд мөнгө нэмэх
+export const addMoneyToWallet = async (req, res) => {
+  const { amount } = req.body;
+  if (!amount || amount <= 0) return res.status(400).json({ message: "Буруу дүн" });
+
+  const user = await User.findById(req.user._id);
+  user.wallet = (user.wallet || 0) + amount;
+  await user.save();
+
+  res.json({ wallet: user.wallet });
+};
+
+// Хэтэвчний үлдэгдэл авах
+export const getWalletBalance = async (req, res) => {
+  const user = await User.findById(req.user._id);
+  res.json({ wallet: user.wallet || 0 });
+};
+
 
 

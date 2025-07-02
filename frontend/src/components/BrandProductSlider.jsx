@@ -18,7 +18,7 @@ export default function BrandProductSlider({
 }) {
   const { wishlist, addToWishlist, removeFromWishlist } = useWishlist();
   const { addToCart } = useCart();
-  const { showNotification } = useNotification(); // notification context-оос авна
+  const { showNotification } = useNotification(); 
 
   if (!products || products.length === 0) return null;
 

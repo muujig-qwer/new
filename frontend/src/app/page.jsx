@@ -6,8 +6,6 @@ import FeaturedCarousel from "@/components/FeaturedCarousel";
 import CategorySlider from "@/components/CategorySlider";
 import DiscountSlider from "@/components/DiscountSlider";
 import BrandProductSlider from "@/components/BrandProductSlider";
-import { FaFacebookF, FaInstagram, FaYoutube } from "react-icons/fa";
-import { motion } from "framer-motion";
 import { useWishlist } from "@/context/WishlistContext";
 
 const categorySliders = [

@@ -72,7 +72,7 @@ export function CartProvider({ children }) {
         removeFromCart,
         clearCart,
         userId,
-        setUserId,  // ЭНЭ-г нэмсэн
+        setUserId, 
       }}
     >
       {children}

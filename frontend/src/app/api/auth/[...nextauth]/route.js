@@ -18,7 +18,9 @@ export const authOptions = {
       return token;
     },
     async session({ session, token }) {
-      session.role = token.role;
+      // Гол өөрчлөлт ↓↓↓
+      session.user.role = token.role; // session.user.role-д онооно
+      session.accessToken = session.accessToken || token.accessToken;
 
       // 1. Backend-аас JWT авах
       if (session.user?.email) {

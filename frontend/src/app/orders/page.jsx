@@ -18,7 +18,10 @@ export default function OrdersPage() {
     const fetchOrders = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:5000/api/orders?email=${encodeURIComponent(session.user.email)}`
+          `http://localhost:5000/api/orders?email=${encodeURIComponent(session.user.email)}`,
+          {
+            headers: { Authorization: `Bearer ${session.accessToken}` }
+          }
         )
         setOrders(res.data)
       } catch (err) {
@@ -73,7 +76,7 @@ export default function OrdersPage() {
           <Link href="/profile" className="flex items-center gap-2 text-gray-700 hover:text-black">
             <span>👤</span> Миний мэдээлэл
           </Link>
-          <Link href="#" className="flex items-center gap-2 text-gray-700 hover:text-black">
+          <Link href="/wallet" className="flex items-center gap-2 text-gray-700 hover:text-black">
             <span>📁</span> Хэтэвч
           </Link>
           <Link href="#" className="flex items-center gap-2 text-blue-600 font-medium">
@@ -142,12 +145,12 @@ export default function OrdersPage() {
                     {order.totalPrice.toLocaleString()}₮
                   </div>
                   <div className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs">
-                    {order.products.length} бүтээгдэхүүн
+                    {order.cartItems.length} бүтээгдэхүүн
                   </div>
                 </div>
 
                 <ul className="text-sm text-gray-700 space-y-1">
-                  {order.products.map((p, idx) => (
+                  {order.cartItems.map((p, idx) => (
                     <li key={idx} className="flex items-center gap-2">
                       <span className="w-1.5 h-1.5 bg-green-500 rounded-full inline-block" />
                       {p.product?.name ? (

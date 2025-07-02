@@ -10,10 +10,11 @@ import { protect, admin } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
 
-router.post('/', createOrder)
-router.get('/', getOrders)
-router.put('/:id', updateOrderStatus)
-router.delete('/:id', deleteOrder)
+// protect middleware-г POST / (захиалга үүсгэх) дээр нэмнэ
+router.post('/', protect, createOrder)
+router.get('/', protect, getOrders)
+router.put('/:id', protect, updateOrderStatus)
+router.delete('/:id', protect, deleteOrder)
 router.get('/admin/orders', protect, admin, getAllOrders)
 
 export default router

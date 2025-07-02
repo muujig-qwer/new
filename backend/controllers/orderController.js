@@ -4,47 +4,64 @@ import Product from '../models/Product.js'
 
 export const createOrder = async (req, res) => {
   try {
-    const { email, products, totalPrice } = req.body
+    const {
+      cartItems,
+      phone,
+      note,
+      location,
+      totalPrice,
+      payWithWallet,
+      payWithQr,
+      coupon,
+    } = req.body;
 
-    if (!email) {
-      return res.status(400).json({ message: 'Email байхгүй байна' })
-    }
+    // Хэрэглэгчийг req.user эсвэл session-оос авна
+    const user = await User.findById(req.user?._id);
 
-    // Email-ээр хэрэглэгчийг хайна, байхгүй бол шинээр үүсгэнэ
-    let user = await User.findOne({ email })
     if (!user) {
-      user = await User.create({ email, name: email.split('@')[0] }) // эсвэл илүү дэлгэрэнгүй мэдээлэл session-оос илгээнэ
+      return res.status(400).json({ message: 'Хэрэглэгч олдсонгүй' });
     }
 
-    if (!products || !Array.isArray(products) || products.length === 0) {
-      return res.status(400).json({ message: 'Бүтээгдэхүүн байхгүй байна' })
+    if (!cartItems || !Array.isArray(cartItems) || cartItems.length === 0) {
+      return res.status(400).json({ message: 'Бүтээгдэхүүн байхгүй байна' });
     }
 
+    // Wallet-ээр төлөх бол үлдэгдэл шалгах
+    if (payWithWallet) {
+      if (user.wallet < totalPrice) {
+        return res.status(400).json({ message: "Хэтэвчний үлдэгдэл хүрэлцэхгүй байна" });
+      }
+      user.wallet -= totalPrice;
+      await user.save();
+    }
+
+    // Order үүсгэх
     const order = new Order({
       user: user._id,
-      products,
+      cartItems: cartItems,
+      phone,
+      note,
+      location,
       totalPrice,
-    })
+      payWithWallet: !!payWithWallet,
+      payWithQr: !!payWithQr,
+      coupon, // { code, discount, discountAmount }
+      status: "pending",
+    });
 
-    await order.save()
+    await order.save();
 
     // Захиалсан бүтээгдэхүүн бүрийн үлдэгдлийг хасах
-    for (const item of products) {
+    for (const item of cartItems) {
       const { product: productId, size, color, quantity } = item;
       const product = await Product.findById(productId);
-      if (!product) continue; // эсвэл алдаа буцааж болно
-
-      // stock дотор тохирох size, color байгаа эсэхийг шалгана
+      if (!product) continue;
       const stockIndex = product.stock.findIndex(
         (s) => s.size === size && s.color === color
       );
       if (stockIndex === -1) {
-        // тохирох stock байхгүй бол алдаа буцаах эсвэл continue
-        // return res.status(400).json({ message: `Барааны үлдэгдэл олдсонгүй: ${product.name} (${size}, ${color})` });
         continue;
       }
-
-      // update хийх
       product.stock[stockIndex].quantity -= quantity;
       await product.save();
     }
@@ -67,9 +84,11 @@ export const getOrders = async (req, res) => {
     if (user) {
       filter.user = user._id;
     }
-    const orders = await Order.find(filter).populate('products.product');
+    // products.product биш, cartItems.product гэж populate хийнэ!
+    const orders = await Order.find(filter).populate('user', 'name email').populate('cartItems.product');
     res.json(orders);
   } catch (err) {
+    console.error('orders error:', err);
     res.status(500).json({ message: 'Захиалга уншихад алдаа гарлаа' });
   }
 };
@@ -94,7 +113,7 @@ export const deleteOrder = async (req, res) => {
 
 export const getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find().populate('user', 'name email')
+    const orders = await Order.find().populate('user', 'name email').populate('cartItems.product');
     res.json(orders)
   } catch (err) {
     res.status(500).json({ message: 'Серверийн алдаа' })

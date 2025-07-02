@@ -15,7 +15,11 @@ const userSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Product'
     }
-  ]
+  ],
+  wallet: {
+    type: Number,
+    default: 0,
+  },
 }, { timestamps: true });
 
 export default mongoose.model('User', userSchema);
