@@ -88,6 +88,9 @@ export default function Navbar() {
   const [mapPosition, setMapPosition] = useState([47.918873, 106.917701]); // default: Ulaanbaatar
   const [showMap, setShowMap] = useState(false);
   const [tempPosition, setTempPosition] = useState(mapPosition); // Түр хадгалах байршил
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const notifRef = useRef();
 
   const isAdmin = session?.user?.email === "muujig165@gmail.com";
   const userName = session?.user?.name || "";
@@ -213,6 +216,29 @@ export default function Navbar() {
       localStorage.setItem("user_location", location);
     }
   }, [location]);
+
+  // Жишээ notification fetch (API-г өөрийнхөөрөө солиорой)
+  useEffect(() => {
+    if (!session) return;
+    fetch("http://localhost:5000/api/notifications", {
+      headers: {
+        Authorization: `Bearer ${session?.accessToken}` // protect middleware-д токен дамжуулна
+      }
+    })
+      .then(res => res.json())
+      .then(data => setNotifications(data.notifications || []));
+  }, [session]);
+
+  // Dropdown outside click хаах
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (notifRef.current && !notifRef.current.contains(e.target)) {
+        setNotifOpen(false);
+      }
+    }
+    if (notifOpen) document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [notifOpen]);
 
   return (
     <div className="relative w-full">
@@ -355,9 +381,39 @@ export default function Navbar() {
                           </span>
                         )}
                       </Link>
-                      <Link href="/notifications" className="p-2 text-gray-600 hover:text-green-600 transition-colors">
-                        <FaBell className="h-5 w-5" />
-                      </Link>
+                      {/* Notification dropdown button - Link-ийг button болгож, dropdown харуулна */}
+                      <div className="relative" ref={notifRef}>
+                        <button
+                          type="button"
+                          className="p-2 text-gray-600 hover:text-green-600 transition-colors relative"
+                          onClick={() => setNotifOpen((v) => !v)}
+                        >
+                          <FaBell className="h-5 w-5" />
+                          {notifications.length > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1">
+                              {notifications.length}
+                            </span>
+                          )}
+                        </button>
+                        {notifOpen && (
+                          <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-30 max-h-96 overflow-y-auto">
+                            <div className="p-3 border-b font-semibold text-gray-700">Мэдэгдэл</div>
+                            {notifications.length === 0 ? (
+                              <div className="p-4 text-gray-400 text-sm text-center">Мэдэгдэл алга байна</div>
+                            ) : (
+                              <ul>
+                                {notifications.map((notif, idx) => (
+                                  <li key={idx} className="px-4 py-3 border-b last:border-b-0 hover:bg-gray-50 text-sm">
+                                    <div className="font-medium text-gray-800">{notif.title || "Мэдэгдэл"}</div>
+                                    <div className="text-gray-600">{notif.body || notif.message}</div>
+                                    <div className="text-xs text-gray-400 mt-1">{notif.date ? new Date(notif.date).toLocaleString() : ""}</div>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                        )}
+                      </div>
                       <Link href="/profile" className="p-2 text-gray-600 hover:text-green-600 transition-colors">
                         <FaUser className="h-5 w-5" />
                       </Link>

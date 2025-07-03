@@ -1,12 +1,15 @@
 'use client'
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import axios from "axios";
 
 export default function MyCouponsPage() {
   const { data: session, status } = useSession();
   const [coupons, setCoupons] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Купон авах
   useEffect(() => {
     if (!session?.accessToken) return;
     fetch("http://localhost:5000/api/coupon/user", {
@@ -20,6 +23,19 @@ export default function MyCouponsPage() {
         setLoading(false);
       });
   }, [session]);
+
+  // Категори авах
+  useEffect(() => {
+    axios.get('http://localhost:5000/api/categories').then((res) => {
+      setCategories(res.data);
+    });
+  }, []);
+
+  // ID-аас нэр авах функц
+  const getCategoryName = (id) => {
+    const cat = categories.find((c) => c._id === id);
+    return cat ? cat.name : "Ерөнхий";
+  };
 
   if (status === "loading" || loading) {
     return (
@@ -44,26 +60,44 @@ export default function MyCouponsPage() {
         {coupons.length === 0 ? (
           <p className="text-gray-500 text-center py-8">Танд купон байхгүй байна.</p>
         ) : (
-          <table className="w-full text-sm">
-            <thead>
-              <tr>
-                <th className="text-left py-2">Код</th>
-                <th className="text-left py-2">Хөнгөлөлт</th>
-                <th className="text-left py-2">Дуусах огноо</th>
-              </tr>
-            </thead>
-            <tbody>
-              {coupons.map((c) => (
-                <tr key={c._id} className="border-t">
-                  <td className="py-1">{c.code}</td>
-                  <td className="py-1">{c.discount}%</td>
-                  <td className="py-1">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {coupons.map((c) => (
+              <div
+                key={c._id}
+                className="border border-blue-200 rounded-xl p-4 flex flex-col gap-2 bg-blue-50 shadow-sm hover:shadow-md transition"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-blue-700 text-lg">{c.code}</span>
+                  <span className="bg-blue-600 text-white text-xs font-semibold px-2 py-1 rounded">
+                    {c.discount}% хөнгөлөлт
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  {(c.categories && c.categories.length > 0)
+                    ? c.categories.map((catId) => (
+                        <span
+                          key={catId}
+                          className="bg-gray-200 text-gray-700 text-xs px-2 py-0.5 rounded mb-1"
+                        >
+                          {getCategoryName(catId)}
+                        </span>
+                      ))
+                    : (
+                        <span className="bg-gray-200 text-gray-700 text-xs px-2 py-0.5 rounded">
+                          Бүх категори
+                        </span>
+                      )
+                  }
+                </div>
+                <div className="text-xs text-gray-600 mt-2">
+                  Дуусах огноо:{" "}
+                  <span className="font-semibold">
                     {c.expires ? new Date(c.expires).toLocaleDateString() : "-"}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
     </div>

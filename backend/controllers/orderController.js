@@ -1,6 +1,7 @@
 import Order from '../models/Order.js'
 import User from '../models/User.js'
 import Product from '../models/Product.js'
+import Notification from '../models/Notification.js' // Notification model-оо импортлоорой
 
 export const createOrder = async (req, res) => {
   try {
@@ -51,6 +52,15 @@ export const createOrder = async (req, res) => {
 
     await order.save();
 
+    // Захиалга үүсэхэд notification үүсгэнэ
+    await Notification.create({
+      userId: user._id,
+      title: "Захиалга амжилттай!",
+      body: "Таны захиалга амжилттай бүртгэгдлээ.",
+      date: new Date(),
+      read: false,
+    });
+
     // Захиалсан бүтээгдэхүүн бүрийн үлдэгдлийг хасах
     for (const item of cartItems) {
       const { product: productId, size, color, quantity } = item;
@@ -96,6 +106,29 @@ export const getOrders = async (req, res) => {
 export const updateOrderStatus = async (req, res) => {
   try {
     const order = await Order.findByIdAndUpdate(req.params.id, { status: req.body.status }, { new: true });
+
+    // Статус хүргэлтэд эсвэл дууссан үед notification үүсгэнэ
+    if (order) {
+      if (req.body.status === "shipped") {
+        await Notification.create({
+          userId: order.user,
+          title: "Захиалга хүргэлтэд гарлаа",
+          body: "Таны захиалга хүргэлтэд гарсан байна.",
+          date: new Date(),
+          read: false,
+        });
+      }
+      if (req.body.status === "completed") {
+        await Notification.create({
+          userId: order.user,
+          title: "Захиалга дууслаа",
+          body: "Таны захиалга амжилттай хүргэгдлээ.",
+          date: new Date(),
+          read: false,
+        });
+      }
+    }
+
     res.json(order);
   } catch (err) {
     res.status(500).json({ error: err.message });

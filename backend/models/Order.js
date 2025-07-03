@@ -19,7 +19,8 @@ const orderSchema = new mongoose.Schema({
     discount: Number,
     discountAmount: Number,
   },
-  status: { type: String, default: 'pending' },
+  delivery: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // Оноогдсон хүргэлтийн ажилтан
+  status: { type: String, enum: ["pending", "assigned", "out_for_delivery", "completed"], default: "pending" },
   createdAt: { type: Date, default: Date.now }
 })
 

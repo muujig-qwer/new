@@ -1,5 +1,5 @@
 import express from 'express';
-import { register, login, getProfile, updateProfile, getAllUsers, createAdmin, addToWishlist, removeFromWishlist , getWishlist, getUserByEmail, googleLogin } from '../controllers/authController.js';
+import { register, login, getProfile, updateProfile, getAllUsers, createAdmin, addToWishlist, removeFromWishlist , getWishlist, getUserByEmail, googleLogin, updateUserRole } from '../controllers/authController.js';
 import { protect , admin} from '../middleware/authMiddleware.js';
 import multer from 'multer';
 
@@ -17,5 +17,6 @@ router.delete('/:userId/wishlist/:productId', removeFromWishlist);
 router.get('/:userId/wishlist', getWishlist);
 router.get('/email/:email', getUserByEmail);
 router.post('/google-login', googleLogin);
+router.put('/users/:id/role', protect, admin, updateUserRole);
 
 export default router;

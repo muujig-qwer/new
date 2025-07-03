@@ -164,9 +164,17 @@ export const getUserByEmail = async (req, res) => {
 };
 
 export const googleLogin = async (req, res) => {
-  const { email } = req.body;
-  const user = await User.findOne({ email });
-  if (!user) return res.status(401).json({ message: 'User not found' });
+  const { email, name } = req.body;
+  let user = await User.findOne({ email });
+  if (!user) {
+    // Шинэ хэрэглэгчийг автоматаар бүртгэнэ
+    user = await User.create({
+      name: name || email.split("@")[0],
+      email,
+      password: Math.random().toString(36).slice(-8), // random password
+      role: "user",
+    });
+  }
   // JWT-д id, role, email-ийг хамтад нь хийж өгнө
   const token = jwt.sign(
     { id: user._id, role: user.role, email: user.email },
@@ -192,6 +200,23 @@ export const addMoneyToWallet = async (req, res) => {
 export const getWalletBalance = async (req, res) => {
   const user = await User.findById(req.user._id);
   res.json({ wallet: user.wallet || 0 });
+};
+
+// Хэрэглэгчийн үүрэг (role) солих
+export const updateUserRole = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { role } = req.body;
+    // зөвшөөрөгдсөн role эсэхийг шалгах
+    if (!["user", "admin", "delivery"].includes(role)) {
+      return res.status(400).json({ message: "Role буруу байна" });
+    }
+    const user = await User.findByIdAndUpdate(id, { role }, { new: true });
+    if (!user) return res.status(404).json({ message: "User not found" });
+    res.json({ message: "Role амжилттай солигдлоо", user });
+  } catch (err) {
+    res.status(500).json({ message: "Серверийн алдаа", error: err.message });
+  }
 };
 
 

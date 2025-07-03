@@ -1,29 +1,37 @@
 'use client'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 
 export default function UsersPage() {
   const [users, setUsers] = useState([])
   const [error, setError] = useState('')
+  const { data: session, status } = useSession()
+  const router = useRouter()
 
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    if (!token) {
-      setError('Та нэвтрээгүй байна.')
+    if (status === 'loading') return
+    if (!session) {
+      router.replace('/login')
+      return
+    }
+    if (session.user?.role !== 'admin') {
+      setError('Энэ хуудсыг зөвхөн админ хэрэглэгч үзэх боломжтой.')
       return
     }
 
     axios
       .get('http://localhost:5000/api/auth/users', {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: `Bearer ${session.accessToken}` },
       })
-      .then((res) => {
-        setUsers(res.data)
-      })
-      .catch(() => {
-        setError('Хэрэглэгчдийн мэдээлэл авахад алдаа гарлаа.')
-      })
-  }, [])
+      .then((res) => setUsers(res.data))
+      .catch(() => setError('Хэрэглэгчдийн мэдээлэл авахад алдаа гарлаа.'))
+  }, [session, status, router])
+
+  if (status === 'loading') {
+    return <p className="text-center mt-10">Ачааллаж байна...</p>
+  }
 
   if (error) {
     return <p className="text-red-600 text-center mt-10">{error}</p>

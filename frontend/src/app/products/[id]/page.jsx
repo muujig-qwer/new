@@ -74,9 +74,10 @@ export default function ProductDetailPage() {
   const [commentsLoading, setCommentsLoading] = useState(false);
   const [countdown, setCountdown] = useState("");
   const [animate, setAnimate] = useState(false);
+  const [cartError, setCartError] = useState("");
   const countdownRef = useRef();
 
-  const { addToCart } = useCart();
+  const { addToCart, userId } = useCart();
   const { wishlist, addToWishlist, removeFromWishlist } = useWishlist();
 
   useEffect(() => {
@@ -121,9 +122,45 @@ export default function ProductDetailPage() {
     return () => clearInterval(timer);
   }, [product?.discountExpires]);
 
+  const getCurrentStock = () => {
+    // Хэмжээтэй бараа бол
+    if (selectedSize && allSizes.some((size) => availableSizes.includes(size))) {
+      return getStockBySize(selectedSize);
+    }
+    // Өнгөтэй бараа бол
+    if (selectedSize && allColors.length > 0) {
+      return getStockByColor(selectedSize);
+    }
+    // Энгийн бараа бол
+    return product?.stock?.[0]?.quantity ?? 0;
+  };
+
   const handleAddToCart = () => {
+    setCartError(""); // өмнөх алдааг арилгана
+    const stock = getCurrentStock();
+
+    let cartCount = 0;
+    if (typeof window !== "undefined") {
+      const cart = JSON.parse(localStorage.getItem(userId ? `cart_${userId}` : "cart") || "[]");
+      cartCount = cart
+        .filter(
+          (item) =>
+            item._id === product._id &&
+            (item.size || "") === (selectedSize || "")
+        )
+        .reduce((sum, item) => sum + (item.quantity || 0), 0);
+    }
+
+    if (quantity + cartCount > stock) {
+      setCartError(
+        `Үлдэгдэл хүрэлцэхгүй байна. Та хамгийн ихдээ ${
+          stock - cartCount > 0 ? stock - cartCount : 0
+        } ширхэг сонгож болно.`
+      );
+      return;
+    }
     if (product.category === "shoes" && !selectedSize) {
-      alert("Хэмжээгээ сонгоно уу");
+      setCartError("Хэмжээгээ сонгоно уу");
       return;
     }
     addToCart(
@@ -256,6 +293,11 @@ export default function ProductDetailPage() {
   // Энэ product wishlist-д байгаа эсэхийг шалгах
   const isWished = wishlist.some((p) => p._id === product._id);
 
+  function isDiscountActive() {
+    if (!product?.discountExpires) return false;
+    return new Date(product.discountExpires) > new Date();
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       {/* Breadcrumb */}
@@ -323,7 +365,7 @@ export default function ProductDetailPage() {
                   {product.name}
                 </h1>
                 <div>
-                  {product.discount > 0 ? (
+                  {isDiscountActive() && product.discount > 0 ? (
                     <div className="flex flex-col gap-0.5">
                       <div className="flex items-end gap-1">
                         <span className="text-base font-bold text-green-700">
@@ -336,13 +378,11 @@ export default function ProductDetailPage() {
                           -{product.discount}%
                         </span>
                       </div>
-                      {/* Хэмнэлт */}
                       {product.discountPrice && product.price && (
                         <div className="text-xs text-green-600 font-semibold mt-0.5">
                           Хэмнэлт: {(product.price - product.discountPrice).toLocaleString()}₮
                         </div>
                       )}
-                      {/* Хямдралын хугацаа */}
                       {product.discountExpires && (
                         <div
                           ref={countdownRef}
@@ -483,7 +523,7 @@ export default function ProductDetailPage() {
                     {quantity}
                   </span>
                   <button
-                    onClick={() => setQuantity(quantity + 1)}
+                    onClick={() => setQuantity(Math.min(getCurrentStock(), quantity + 1))}
                     className="w-7 h-7 border border-gray-300 rounded-full flex items-center justify-center text-base font-bold hover:bg-gray-100 transition"
                   >
                     +
@@ -493,6 +533,9 @@ export default function ProductDetailPage() {
 
               {/* Add to Cart Button */}
               <div className="space-y-2">
+                {cartError && (
+                  <div className="text-red-600 text-xs font-semibold mb-1">{cartError}</div>
+                )}
                 <button
                   onClick={handleAddToCart}
                   className="w-full bg-blue-700 text-white py-2 rounded-full font-bold text-base shadow hover:bg-blue-800 transition"
@@ -697,5 +740,5 @@ export default function ProductDetailPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }

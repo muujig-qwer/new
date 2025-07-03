@@ -9,20 +9,25 @@ export const authOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, account }) {
-      if (token.email === "muujig165@gmail.com") {
-        token.role = "admin";
-      } else {
-        token.role = "user";
-      }
+    async jwt({ token }) {
+      // token.email-ээр backend-ээс role авах боломжгүй тул session callback-д хийе
       return token;
     },
     async session({ session, token }) {
-      // Гол өөрчлөлт ↓↓↓
-      session.user.role = token.role; // session.user.role-д онооно
-      session.accessToken = session.accessToken || token.accessToken;
-
-      // 1. Backend-аас JWT авах
+      // Backend-аас хэрэглэгчийн мэдээлэл авах
+      if (session.user?.email) {
+        try {
+          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/email/${session.user.email}`);
+          if (res.ok) {
+            const dbUser = await res.json();
+            session.user._id = dbUser._id;
+            session.user.role = dbUser.role; // ЖИНХЭНЭ ROLE-ийг онооно!
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+      // JWT авах хэсэг хэвээр үлдээнэ
       if (session.user?.email) {
         try {
           const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/google-login`, {
@@ -32,26 +37,12 @@ export const authOptions = {
           });
           if (res.ok) {
             const data = await res.json();
-            session.accessToken = data.token; // JWT-г session-д онооно
+            session.accessToken = data.token;
           }
         } catch (e) {
           // ignore
         }
       }
-
-      // 2. Backend-ээс хэрэглэгчийн _id-г авах (хүсвэл үлдээж болно)
-      if (session.user?.email) {
-        try {
-          const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/email/${session.user.email}`);
-          if (res.ok) {
-            const dbUser = await res.json();
-            session.user._id = dbUser._id;
-          }
-        } catch (e) {
-          // ignore
-        }
-      }
-
       return session;
     },
   },

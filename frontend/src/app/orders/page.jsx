@@ -106,14 +106,6 @@ export default function OrdersPage() {
           <h1 className="text-2xl font-bold flex items-center gap-3">
             <span className="text-3xl">🧾</span> Миний захиалгууд
           </h1>
-          {orders.length > 0 && (
-            <button
-              className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold"
-              onClick={() => router.push("/checkoutpayment")}
-            >
-              Бүх захиалгыг баталгаажуулах
-            </button>
-          )}
         </div>
 
         {orders.length === 0 ? (
@@ -146,6 +138,37 @@ export default function OrdersPage() {
                   </div>
                   <div className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs">
                     {order.cartItems.length} бүтээгдэхүүн
+                  </div>
+                  {/* Захиалгын статусыг харуулах */}
+                  <div
+                    className={`px-3 py-1 rounded-full text-xs font-semibold
+                      ${
+                        order.status === "pending"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : order.status === "assigned"
+                          ? "bg-blue-100 text-blue-700"
+                          : order.status === "delivered"
+                          ? "bg-green-100 text-green-700"
+                          : order.status === "cancelled"
+                          ? "bg-red-100 text-red-600"
+                          : "bg-gray-100 text-gray-600"
+                      }
+                    `}
+                  >
+                    {(() => {
+                      switch (order.status) {
+                        case "pending":
+                          return "Хүлээгдэж байна";
+                        case "assigned":
+                          return "Хүргэлтэд гарсан";
+                        case "delivered":
+                          return "Хүргэгдсэн";
+                        case "cancelled":
+                          return "Цуцлагдсан";
+                        default:
+                          return order.status;
+                      }
+                    })()}
                   </div>
                 </div>
 

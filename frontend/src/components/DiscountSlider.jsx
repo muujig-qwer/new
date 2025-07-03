@@ -13,14 +13,30 @@ import { useNotification } from "@/context/NotificationContext";
 export default function DiscountSlider({ products }) {
   const { wishlist, addToWishlist, removeFromWishlist } = useWishlist();
   const { addToCart } = useCart();
-  const { showNotification } = useNotification(); // notification context-оос авна
+  const { showNotification } = useNotification();
 
-  // Зөвхөн хямдралтай бараануудыг шүүнэ
+  // Хямдрал идэвхтэй эсэхийг шалгах функц
+  const isDiscountActive = (product) => {
+    if (!product.discountExpires) return true;
+    return new Date(product.discountExpires) > new Date();
+  };
+
+  // Зөвхөн идэвхтэй хямдралтай бараануудыг шүүнэ
   const discountedProducts = products
-    ? products.filter((p) => p.discount && p.discountPrice)
+    ? products.filter(
+        (p) =>
+          p.discount &&
+          p.discountPrice &&
+          isDiscountActive(p)
+      )
     : [];
 
-  if (!discountedProducts || discountedProducts.length === 0) return null;
+  if (!discountedProducts || discountedProducts.length === 0)
+    return (
+      <div className="w-full py-8 text-center text-gray-400 text-lg font-semibold">
+        Одоогоор идэвхтэй хямдралтай бараа байхгүй байна.
+      </div>
+    );
 
   return (
     <div className="w-full py-8 relative">

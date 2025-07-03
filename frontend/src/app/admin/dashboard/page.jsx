@@ -12,6 +12,8 @@ import {
   Layers,
   Settings,
   FileBarChart2,
+  TrendingUp,
+  UserPlus,
 } from "lucide-react";
 import Link from "next/link";
 import clsx from "clsx";
@@ -20,9 +22,14 @@ export default function AdminDashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [stats, setStats] = useState({ products: 0, users: 0, orders: 0 });
+  const [monthlyStats, setMonthlyStats] = useState(null);
+  const [orders, setOrders] = useState([]);
+  const [staffList, setStaffList] = useState([]);
+  const [assigning, setAssigning] = useState({}); // { [orderId]: true/false }
+  const [selectedStaff, setSelectedStaff] = useState({}); // { [orderId]: staffId }
 
   const navItems = [
-    { href: "/admin", label: "Хянах самбар", icon: BarChart3 },
+    { href: "/admin/dashboard", label: "Хянах самбар", icon: BarChart3 },
     { href: "/admin/products", label: "Бүтээгдэхүүн", icon: PlusCircle },
     { href: "/admin/orders", label: "Захиалгууд", icon: PackageCheck },
     { href: "/admin/users", label: "Хэрэглэгчид", icon: Users },
@@ -69,6 +76,35 @@ export default function AdminDashboardPage() {
       fetchStats();
     }
   }, [session]);
+
+  useEffect(() => {
+    axios
+      .get("http://localhost:5000/api/admin/monthly-stats")
+      .then((res) => setMonthlyStats(res.data))
+      .catch(() => setMonthlyStats(null));
+  }, []);
+
+  useEffect(() => {
+    // Захиалгуудыг авах
+    axios.get("http://localhost:5000/api/admin/orders")
+      .then(res => setOrders(res.data));
+    // Delivery staff-уудыг авах
+    axios.get("http://localhost:5000/api/delivery")
+      .then(res => setStaffList(res.data));
+  }, []);
+
+  const handleAssign = async (orderId) => {
+    if (!selectedStaff[orderId]) return;
+    setAssigning(prev => ({ ...prev, [orderId]: true }));
+    await axios.patch(
+      `http://localhost:5000/api/admin/orders/${orderId}/assign`,
+      { delivery: selectedStaff[orderId] }
+    );
+    // Захиалгуудыг дахин ачаалах
+    const res = await axios.get("http://localhost:5000/api/admin/orders");
+    setOrders(res.data);
+    setAssigning(prev => ({ ...prev, [orderId]: false }));
+  };
 
   if (status === "loading") return <div>Ачааллаж байна...</div>;
 
@@ -117,23 +153,28 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Quick Links */}
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {navItems.slice(1).map(({ href, label, icon: Icon }) => (
-            <div
-              key={href}
-              className="bg-white p-6 rounded-xl shadow hover:shadow-md transition flex flex-col items-center"
-            >
-              <Icon className="h-8 w-8 mb-2 text-green-600" />
-              <h2 className="font-semibold text-lg mb-2">{label}</h2>
-              <Link
-                href={href}
-                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
-              >
-                {label} руу
-              </Link>
-            </div>
-          ))}
+        {/* Зөвхөн Хянах самбар дотор харагдах энэ сарын статистик */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-10">
+          <div className="bg-purple-600 text-white p-6 rounded-2xl shadow-lg flex flex-col items-center">
+            <TrendingUp className="h-10 w-10 mb-3" />
+            <p className="text-3xl font-bold">{monthlyStats?.soldProducts ?? "-"}</p>
+            <p className="mt-2 text-lg">Энэ сард зарсан бараа</p>
+          </div>
+          <div className="bg-pink-600 text-white p-6 rounded-2xl shadow-lg flex flex-col items-center">
+            <PlusCircle className="h-10 w-10 mb-3" />
+            <p className="text-3xl font-bold">{monthlyStats?.newProducts ?? "-"}</p>
+            <p className="mt-2 text-lg">Энэ сард нэмэгдсэн бараа</p>
+          </div>
+          <div className="bg-indigo-600 text-white p-6 rounded-2xl shadow-lg flex flex-col items-center">
+            <UserPlus className="h-10 w-10 mb-3" />
+            <p className="text-3xl font-bold">{monthlyStats?.newUsers ?? "-"}</p>
+            <p className="mt-2 text-lg">Энэ сард нэмэгдсэн хэрэглэгч</p>
+          </div>
+          <div className="bg-green-700 text-white p-6 rounded-2xl shadow-lg flex flex-col items-center">
+            <BarChart3 className="h-10 w-10 mb-3" />
+            <p className="text-3xl font-bold">{monthlyStats?.totalRevenue?.toLocaleString() ?? "-"}</p>
+            <p className="mt-2 text-lg">Энэ сард орсон орлого</p>
+          </div>
         </div>
       </main>
     </div>

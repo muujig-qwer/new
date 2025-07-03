@@ -16,11 +16,17 @@ export default function LoginPage() {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    if (status === "loading") return // Session ачааллаж дуусаагүй бол юу ч хийхгүй
+    if (status === "loading") return; // session бүрэн ачаалагдаагүй бол юу ч хийхгүй
     if (session) {
-      router.push("/")
+      if (session.user.role === "delivery") {
+        router.push("/staff/dashboard");
+      } else if (session.user.role === "admin") {
+        router.push("/admin/dashboard");
+      } else {
+        router.push("/");
+      }
     }
-  }, [session, status])
+  }, [session, status, router]);
 
   const handleEmailSubmit = (e) => {
     e.preventDefault()
@@ -49,6 +55,10 @@ export default function LoginPage() {
     } catch (err) {
       setError('Нэвтрэх үед алдаа гарлаа')
     }
+  }
+
+  if (status === "loading") {
+    return <div className="text-center py-10">Түр хүлээнэ үү...</div>;
   }
 
   return (
@@ -128,7 +138,7 @@ export default function LoginPage() {
         )}
 
         <button
-          onClick={() => signIn('google', { callbackUrl: '/' })}
+          onClick={() => signIn('google', { callbackUrl: '/login' })}
           className="bg-red-500 text-white px-4 py-2 rounded w-full mt-4"
         >
           Google-ээр нэвтрэх

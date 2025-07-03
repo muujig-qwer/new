@@ -22,6 +22,12 @@ export default function BrandProductSlider({
 
   if (!products || products.length === 0) return null;
 
+  // Хямдрал идэвхтэй эсэхийг шалгах функц
+  const isDiscountActive = (product) => {
+    if (!product.discountExpires) return true;
+    return new Date(product.discountExpires) > new Date();
+  };
+
   const filteredProducts = brand 
     ? products.filter(product => 
         product.brand?.toLowerCase() === brand.toLowerCase()
@@ -53,6 +59,8 @@ export default function BrandProductSlider({
         >
           {filteredProducts.map((product, index) => {
             const isWished = wishlist.some((p) => p._id === product._id);
+            const discountActive = isDiscountActive(product);
+
             return (
               <SwiperSlide key={`${product._id}-${index}`}>
                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-lg transition-all duration-300">
@@ -72,15 +80,15 @@ export default function BrandProductSlider({
                       />
                     </Link>
 
-                    {/* Discount badge */}
-                    {product.discount && product.discountPrice && (
+                    {/* Discount badge - зөвхөн идэвхтэй үед */}
+                    {discountActive && product.discount && product.discountPrice && (
                       <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded shadow z-10">
                         -{product.discount}%
                       </span>
                     )}
 
                     {/* Installment Badge */}
-                    <div className="absolute top-3 left-3 flex items-center gap-1" style={{ left: product.discount && product.discountPrice ? '3.5rem' : '0.75rem' }}>
+                    <div className="absolute top-3 left-3 flex items-center gap-1" style={{ left: discountActive && product.discount && product.discountPrice ? '3.5rem' : '0.75rem' }}>
                       <span className="bg-teal-500 text-white text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1">
                         <span className="text-[10px]">⚡</span>
                         М
@@ -108,7 +116,7 @@ export default function BrandProductSlider({
                   <div className="p-4">
                     {/* Price & Discount */}
                     <div className="mb-2">
-                      {product.discount && product.discountPrice ? (
+                      {discountActive && product.discount && product.discountPrice ? (
                         <div className="flex flex-col gap-0.5">
                           <div className="flex items-end gap-1">
                             <span className="text-lg font-bold text-green-700">

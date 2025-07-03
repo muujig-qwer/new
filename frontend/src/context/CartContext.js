@@ -36,13 +36,14 @@ export function CartProvider({ children }) {
     setCartItems((prev) => {
       const exists = prev.find(
         (item) => item._id === product._id && item.size === (product.size || selectedSize)
-      )
+      );
       if (exists) {
+        // quantity-г нэмэх биш, handleAddToCart-аас ирсэн тоогоор солино!
         return prev.map((item) =>
           item._id === product._id && item.size === (product.size || selectedSize)
-            ? { ...item, quantity: item.quantity + (product.quantity || 1) }
+            ? { ...item, quantity: product.quantity || 1 }
             : item
-        )
+        );
       }
       return [
         ...prev,
@@ -52,8 +53,8 @@ export function CartProvider({ children }) {
           image: product.images?.[0] || '',
           quantity: product.quantity || 1,
         },
-      ]
-    })
+      ];
+    });
   }
 
   const removeFromCart = (id, size) => {
