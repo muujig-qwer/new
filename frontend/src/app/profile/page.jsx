@@ -58,9 +58,6 @@ export default function ProfilePage() {
           <Link href="/profile/coupons" className="flex items-center gap-2 text-gray-700 hover:text-black">
             <span>🎟️</span> Миний купон
           </Link>
-          <Link href="#" className="flex items-center gap-2 text-gray-700 hover:text-black">
-            <span>🔒</span> Нууц үг солих
-          </Link>
           <Link href="/company/support/faq" className="flex items-center gap-2 text-gray-700 hover:text-black">
             <span>❓</span> Тусламж
           </Link>

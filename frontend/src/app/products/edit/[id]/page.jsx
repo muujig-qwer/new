@@ -2,12 +2,13 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useRouter, useParams } from 'next/navigation'
-import { jwtDecode } from 'jwt-decode'
 import { useWishlist } from "@/context/WishlistContext";
+import { useSession } from "next-auth/react";
 
 const defaultSizes = ['35', '36', '37', '38', '39', '40', '41', '42', '43', '44', '45']
 
 export default function EditProductPage() {
+  const { data: session, status } = useSession();
   const [name, setName] = useState('')
   const [price, setPrice] = useState('')
   const [description, setDescription] = useState('')
@@ -25,24 +26,6 @@ export default function EditProductPage() {
   const router = useRouter()
   const { id } = useParams()
   const { addToWishlist, wishlist, removeFromWishlist } = useWishlist();
-
-  useEffect(() => {
-    const token = localStorage.getItem('token')
-    if (!token) {
-      router.push('/login')
-      return
-    }
-    try {
-      const decoded = jwtDecode(token)
-      if (decoded.role === 'admin') {
-        setIsAdmin(true)
-      } else {
-        router.push('/')
-      }
-    } catch {
-      router.push('/login')
-    }
-  }, [router])
 
   useEffect(() => {
     axios.get('http://localhost:5000/api/categories').then((res) => {
@@ -136,7 +119,7 @@ export default function EditProductPage() {
         formData,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${session.accessToken}`,
             'Content-Type': 'multipart/form-data',
           },
         }
@@ -148,7 +131,19 @@ export default function EditProductPage() {
     }
   }
 
-  if (!isAdmin) {
+  useEffect(() => {
+    if (status === "loading") return;
+    if (status === "unauthenticated") {
+      router.replace("/login");
+      return;
+    }
+    if (status === "authenticated" && session?.user?.role !== "admin") {
+      router.replace("/");
+      return;
+    }
+  }, [session, status, router]);
+
+  if (status === "loading" || status === "unauthenticated" || (status === "authenticated" && session?.user?.role !== "admin")) {
     return <p className="mt-10 text-center">Ачааллаж байна...</p>
   }
 

@@ -79,6 +79,13 @@ export default function AdminProductsPage() {
     return found ? found.name : "-";
   };
 
+  function isDiscountActive(product) {
+    // discountEnd, discountExpires аль алиныг нь шалгахад тохиромжтой
+    if (!product?.discountEnd && !product?.discountExpires) return product.discount > 0;
+    const end = product.discountEnd || product.discountExpires;
+    return product.discount > 0 && new Date(end) > new Date();
+  }
+
   if (status === "loading") return <div>Ачааллаж байна...</div>;
 
   return (
@@ -137,7 +144,7 @@ export default function AdminProductsPage() {
                   <td className="p-2 border">{getCategoryName(p.category)}</td>
                   <td className="p-2 border">{p.price?.toLocaleString()}₮</td>
                   <td className="p-2 border">
-                    {p.discount ? (
+                    {isDiscountActive(p) ? (
                       <span className="text-red-600 font-bold">-{p.discount}%</span>
                     ) : (
                       "-"
@@ -150,7 +157,7 @@ export default function AdminProductsPage() {
                   </td>
                   <td className="p-2 border">
                     <Link
-                      href={`/admin/products/edit/${p._id}`}
+                      href={`/products/edit/${p._id}`}
                       className="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded mr-2"
                     >
                       Засах

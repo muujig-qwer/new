@@ -240,6 +240,28 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [notifOpen]);
 
+  // Уншаагүй мэдэгдлийн тоо
+  const unreadCount = notifications.filter(n => !n.read).length;
+
+  // Мэдэгдэл нээхэд бүх мэдэгдлийг уншсан болгож сервер рүү илгээх
+  const handleNotifOpen = async () => {
+    setNotifOpen((v) => !v);
+    if (!notifOpen && unreadCount > 0) {
+      // PUT эсвэл POST хүсэлтээр бүх мэдэгдлийг уншсан болгож серверт илгээнэ
+      await fetch("http://localhost:5000/api/notifications/mark-all-read", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session?.accessToken}`,
+        },
+      });
+      // Local state-ийг шинэчилнэ
+      setNotifications((prev) =>
+        prev.map((n) => ({ ...n, read: true }))
+      );
+    }
+  };
+
   return (
     <div className="relative w-full">
       {/* Main Navbar */}
@@ -386,12 +408,12 @@ export default function Navbar() {
                         <button
                           type="button"
                           className="p-2 text-gray-600 hover:text-green-600 transition-colors relative"
-                          onClick={() => setNotifOpen((v) => !v)}
+                          onClick={handleNotifOpen}
                         >
                           <FaBell className="h-5 w-5" />
-                          {notifications.length > 0 && (
+                          {unreadCount > 0 && (
                             <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1">
-                              {notifications.length}
+                              {unreadCount}
                             </span>
                           )}
                         </button>
@@ -403,10 +425,25 @@ export default function Navbar() {
                             ) : (
                               <ul>
                                 {notifications.map((notif, idx) => (
-                                  <li key={idx} className="px-4 py-3 border-b last:border-b-0 hover:bg-gray-50 text-sm">
+                                  <li
+                                    key={idx}
+                                    className="px-4 py-3 border-b last:border-b-0 hover:bg-gray-50 text-sm cursor-pointer"
+                                    onClick={() => {
+                                      // Захиалгатай холбоотой мэдэгдэл үү гэдгийг шалгах (жишээ: title эсвэл төрөл)
+                                      if (
+                                        notif.title?.toLowerCase().includes("захиалга") ||
+                                        notif.body?.toLowerCase().includes("захиалга")
+                                      ) {
+                                        setNotifOpen(false);
+                                        router.push("/orders");
+                                      }
+                                    }}
+                                  >
                                     <div className="font-medium text-gray-800">{notif.title || "Мэдэгдэл"}</div>
                                     <div className="text-gray-600">{notif.body || notif.message}</div>
-                                    <div className="text-xs text-gray-400 mt-1">{notif.date ? new Date(notif.date).toLocaleString() : ""}</div>
+                                    <div className="text-xs text-gray-400 mt-1">
+                                      {notif.date ? new Date(notif.date).toLocaleString() : ""}
+                                    </div>
                                   </li>
                                 ))}
                               </ul>

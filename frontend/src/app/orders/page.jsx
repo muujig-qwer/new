@@ -85,11 +85,8 @@ export default function OrdersPage() {
           <Link href="/favorites" className="flex items-center gap-2 text-gray-700 hover:text-black">
             <span>💚</span> Хүслийн жагсаалт
           </Link>
-          <Link href="#" className="flex items-center gap-2 text-gray-700 hover:text-black">
-            <span>🔗</span> И-баримт холбох
-          </Link>
-          <Link href="#" className="flex items-center gap-2 text-gray-700 hover:text-black">
-            <span>🔒</span> Нууц үг солих
+          <Link href="/profile/coupons" className="flex items-center gap-2 text-gray-700 hover:text-black">
+            <span>🎟️</span> Миний купон
           </Link>
           <Link href="/company/support/faq" className="flex items-center gap-2 text-gray-700 hover:text-black">
             <span>❓</span> Тусламж

@@ -91,7 +91,7 @@ export default function Footer() {
                 <br />
                 06:00 – 22:00 (ажлын цаг)
                 <br />
-                info@freshpack.mn
+                info@.mn
               </p>
             </div>
 
@@ -115,7 +115,7 @@ export default function Footer() {
 
             <div className="text-right">
               <p className="text-xs text-gray-500">
-                FreshPack.mn ©2025. Бүх эрх хуулиар хамгаалагдсан.
+                ©2025. Бүх эрх хуулиар хамгаалагдсан.
               </p>
             </div>
           </div>

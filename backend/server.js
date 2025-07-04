@@ -12,6 +12,7 @@ import walletRoutes from './routes/wallet.js'; // wallet route-оо импорт
 import adminRoutes from './routes/admin.js'; // admin route-оо импортло
 import deliveryRoutes from './routes/delivery.js'; // delivery route-оо импортло
 import notificationRoutes from './routes/notificationRoutes.js'; // notification route-оо импортло
+import reportRoutes from './routes/reportRoutes.js'; // report route-оо импортло
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -37,9 +38,9 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/coupon', couponRoutes);
 app.use('/api/wallet', walletRoutes);
-app.use('/api/admin', adminRoutes); // ЭНЭ МӨРӨӨ нэмээрэй!
-app.use('/api/delivery', deliveryRoutes); // шинээр нэмэх
-app.use('/api/notifications', notificationRoutes); // notification route-oo нэмэх
-
+app.use('/api/admin', adminRoutes);
+app.use('/api/delivery', deliveryRoutes); 
+app.use('/api/notifications', notificationRoutes); 
+app.use('/api/admin/reports', reportRoutes); 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));

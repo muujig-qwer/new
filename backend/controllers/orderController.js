@@ -137,7 +137,7 @@ export const updateOrderStatus = async (req, res) => {
 
 export const deleteOrder = async (req, res) => {
   try {
-    await Order.findByIdAndDelete(req.params.id);
+    await Order.findByIdAndDelete(req.params.id); 
     res.json({ message: 'Deleted' });
   } catch (err) {
     res.status(500).json({ error: err.message });
