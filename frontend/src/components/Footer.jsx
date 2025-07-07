@@ -8,7 +8,7 @@ import {
 
 export default function Footer() {
   return (
-    <footer className="bg-white  mt-12">
+    <footer className="bg-white mt-12">
       <div className="max-w-7xl mx-auto px-4 py-10 grid grid-cols-1 md:grid-cols-6 gap-8">
         {/* FreshPack хэсэг */}
         <div className="md:col-span-2">
@@ -81,9 +81,10 @@ export default function Footer() {
           </ul>
         </div>
 
-        {/* Холбоо барих болон сошиал хэсэг */}
-        <div className="md:col-span-6">
-          <div className="border-t pt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Доод хэсэг: Холбоо барих, сошиал, copyright */}
+        <div className="md:col-span-6 mt-10">
+          <div className="border-t pt-6 grid grid-cols-1 md:grid-cols-3 gap-6 text-center md:text-left">
+            {/* Contact info */}
             <div>
               <h3 className="font-bold mb-2">Холбоо барих</h3>
               <p className="text-sm text-gray-600">
@@ -95,7 +96,8 @@ export default function Footer() {
               </p>
             </div>
 
-            <div className="flex items-center gap-4 text-gray-500 text-2xl">
+            {/* Social links */}
+            <div className="flex justify-center md:justify-start items-center gap-4 text-gray-500 text-2xl">
               <a href="#" aria-label="Facebook">
                 <FaFacebookF />
               </a>
@@ -113,10 +115,9 @@ export default function Footer() {
               </a>
             </div>
 
-            <div className="text-right">
-              <p className="text-xs text-gray-500">
-                ©2025. Бүх эрх хуулиар хамгаалагдсан.
-              </p>
+            {/* Copyright */}
+            <div className="text-xs text-gray-500 md:text-right text-center">
+              ©2025. Бүх эрх хуулиар хамгаалагдсан.
             </div>
           </div>
         </div>

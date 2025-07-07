@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useEffect, useRef, useMemo } from "react";
 import {
+  FaChartBar,
   FaMale,
   FaFemale,
   FaChild,
@@ -55,17 +56,18 @@ const Marker = dynamic(
   () => import("react-leaflet").then((mod) => mod.Marker),
   { ssr: false }
 );
-const Popup = dynamic(
-  () => import("react-leaflet").then((mod) => mod.Popup),
-  { ssr: false }
-);
+const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), {
+  ssr: false,
+});
 
 function CategoryIcon({ icon: Icon, label, href, isActive = false }) {
   return (
     <Link
       href={href}
       className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 hover:bg-gray-100 ${
-        isActive ? "bg-blue-50 text-blue-600" : "text-gray-600 hover:text-gray-800"
+        isActive
+          ? "bg-blue-50 text-blue-600"
+          : "text-gray-600 hover:text-gray-800"
       }`}
     >
       <Icon className="h-5 w-5" />
@@ -139,9 +141,11 @@ export default function Navbar() {
           const data = await res.json();
           const address = data.address;
           const sum = address.suburb || address.town || address.village || "";
-          const duureg = address.city_district || address.county || address.state || "";
+          const duureg =
+            address.city_district || address.county || address.state || "";
           setLocation(
-            [sum, duureg].filter(Boolean).join(", ") || "Байршил тодорхойлогдсонгүй"
+            [sum, duureg].filter(Boolean).join(", ") ||
+              "Байршил тодорхойлогдсонгүй"
           );
         } catch {
           setLocation("Байршил тодорхойлох боломжгүй байна");
@@ -173,12 +177,14 @@ export default function Navbar() {
       const address = data.address;
       // Илүү дэлгэрэнгүй хаяг бүрдүүлэх
       const details = [
-        address.road,         // Гудамж
+        address.road, // Гудамж
         address.house_number, // Байрны дугаар
-        address.suburb,       // Дэд хороолол/хороо
+        address.suburb, // Дэд хороолол/хороо
         address.city_district || address.county || address.state, // Дүүрэг
-        address.city || address.town || address.village, 
-      ].filter(Boolean).join(", ");
+        address.city || address.town || address.village,
+      ]
+        .filter(Boolean)
+        .join(", ");
       setLocation(details || "Байршил тодорхойлогдсонгүй");
     } catch {
       setLocation("Байршил тодорхойлох боломжгүй байна");
@@ -186,14 +192,39 @@ export default function Navbar() {
   };
 
   const categories = [
-    { icon: FaMale, label: "Эрэгтэй", href: "/category/mens", key: "mensneaker" },
-    { icon: FaFemale, label: "Эмэгтэй", href: "/category/womens", key: "womensneaker" },
-    { icon: FaTripadvisor, label: "Аялал", href: "/category/travel", key: "travel" },
+    {
+      icon: FaMale,
+      label: "Эрэгтэй",
+      href: "/category/mens",
+      key: "mensneaker",
+    },
+    {
+      icon: FaFemale,
+      label: "Эмэгтэй",
+      href: "/category/womens",
+      key: "womensneaker",
+    },
+    {
+      icon: FaTripadvisor,
+      label: "Аялал",
+      href: "/category/travel",
+      key: "travel",
+    },
     { icon: FaPhone, label: "Гар Утас", href: "/garutas", key: "garutas" },
     { icon: FaChild, label: "Хүүхэд", href: "/category/kids", key: "kids" },
-    { icon: FaBasketballBall, label: "Спорт", href: "/category/sports", key: "sports" },
-    { icon: FaGamepad, label: "И-Спорт", href: "/category/esports", key: "esports" },
-    { icon: FaBook, label: "Ном", href: "/category/books", key: "books" }
+    {
+      icon: FaBasketballBall,
+      label: "Спорт",
+      href: "/category/sports",
+      key: "sports",
+    },
+    {
+      icon: FaGamepad,
+      label: "И-Спорт",
+      href: "/category/esports",
+      key: "esports",
+    },
+    { icon: FaBook, label: "Ном", href: "/category/books", key: "books" },
   ];
 
   // Custom icon-ыг зөвхөн client дээр үүсгэнэ
@@ -222,11 +253,11 @@ export default function Navbar() {
     if (!session) return;
     fetch("http://localhost:5000/api/notifications", {
       headers: {
-        Authorization: `Bearer ${session?.accessToken}` // protect middleware-д токен дамжуулна
-      }
+        Authorization: `Bearer ${session?.accessToken}`, // protect middleware-д токен дамжуулна
+      },
     })
-      .then(res => res.json())
-      .then(data => setNotifications(data.notifications || []));
+      .then((res) => res.json())
+      .then((data) => setNotifications(data.notifications || []));
   }, [session]);
 
   // Dropdown outside click хаах
@@ -241,7 +272,7 @@ export default function Navbar() {
   }, [notifOpen]);
 
   // Уншаагүй мэдэгдлийн тоо
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   // Мэдэгдэл нээхэд бүх мэдэгдлийг уншсан болгож сервер рүү илгээх
   const handleNotifOpen = async () => {
@@ -256,9 +287,7 @@ export default function Navbar() {
         },
       });
       // Local state-ийг шинэчилнэ
-      setNotifications((prev) =>
-        prev.map((n) => ({ ...n, read: true }))
-      );
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     }
   };
 
@@ -292,9 +321,9 @@ export default function Navbar() {
               </Link>
             </div>
 
-            {/* Center Section - Search Bar (Desktop) */}
-            <div className="flex-1 max-w-2xl mx-8">
-              <form onSubmit={handleSearch} className="hidden md:flex">
+            {/* Center Section - Search Bar (Desktop & Mobile) */}
+            <div className="flex-1 max-w-2xl mx-8 md:mx-4">
+              <form onSubmit={handleSearch} className="flex w-full">
                 <div className="relative w-full">
                   <input
                     type="text"
@@ -315,7 +344,7 @@ export default function Navbar() {
 
             {/* Right Section - Location + Navigation Icons */}
             <div className="flex items-center gap-6">
-              {/* Location (Desktop) */}
+              {/* Location (Desktop Only) */}
               <div
                 className="hidden lg:flex items-center text-sm text-gray-600 cursor-pointer hover:text-gray-800 transition-colors"
                 onClick={() => setShowMap(true)}
@@ -327,9 +356,12 @@ export default function Navbar() {
               </div>
 
               {/* Popup/modal дотор газрын зураг - Байршил сонгох */}
-              {showMap && (
+              {showMap && MapContainer && (
                 <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-                  <div className="bg-white rounded-lg shadow-lg p-4 relative" style={{ width: 400, height: 340 }}>
+                  <div
+                    className="bg-white rounded-lg shadow-lg p-4 relative"
+                    style={{ width: 400, height: 340 }}
+                  >
                     <button
                       className="absolute top-2 right-2 text-gray-600 hover:text-red-600"
                       onClick={() => setShowMap(false)}
@@ -346,16 +378,18 @@ export default function Navbar() {
                         attribution='&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                       />
-                      <Marker
-                        position={tempPosition}
-                        draggable={true}
-                        icon={customIcon}
-                        eventHandlers={{
-                          dragend: handleMarkerDrag,
-                        }}
-                      >
-                        <Popup>Маркерийг чирж байршлаа сонгоно уу</Popup>
-                      </Marker>
+                      {customIcon && (
+                        <Marker
+                          position={tempPosition}
+                          draggable={true}
+                          icon={customIcon}
+                          eventHandlers={{
+                            dragend: handleMarkerDrag,
+                          }}
+                        >
+                          <Popup>Маркерийг чирж байршлаа сонгоно уу</Popup>
+                        </Marker>
+                      )}
                     </MapContainer>
                     <button
                       className="mt-3 w-full px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
@@ -367,143 +401,153 @@ export default function Navbar() {
                 </div>
               )}
 
-              {/* Navigation Icons */}
+              {/* Navigation Icons (Desktop & Mobile) */}
               <div className="flex items-center gap-3">
-                {/* Desktop Icons */}
-                <div className="hidden md:flex items-center gap-3">
-                  {session ? (
-                    <>
-                      {!isAdmin && (
-                        <>
-                          {/* Cart icon хэсэг */}
-                          <Link
-                            href="/cart"
-                            className={`relative p-2 rounded-2xl transition-colors min-w-[40px] flex justify-center items-center
-                              bg-white
-                              ${cartItems.length === 0 ? "text-gray-600" : "text-black"}
-                            `}
-                          >
-                            {cartItems.length === 0 ? (
-                              // Cart хоосон үед саарал icon
-                              <FaShoppingCart className="h-5 w-5" />
-                            ) : (
-                              // Cart-д бүтээгдэхүүн байгаа үед нийт үнэ харуулах (хар текст)
-                              <span className="text-xs font-semibold select-none">
-                                Нийт үнэ: {cartTotal.toLocaleString()}₮
-                              </span>
-                            )}
-                          </Link>
-                        </>
-                      )}
-                      <Link href="/favorites" className="relative p-2 text-gray-600 hover:text-green-600 transition-colors">
-                        <FaHeart className="h-5 w-5" />
-                        {wishlist.length > 0 && (
-                          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1">
-                            {wishlist.length}
-                          </span>
-                        )}
-                      </Link>
-                      {/* Notification dropdown button - Link-ийг button болгож, dropdown харуулна */}
-                      <div className="relative" ref={notifRef}>
-                        <button
-                          type="button"
-                          className="p-2 text-gray-600 hover:text-green-600 transition-colors relative"
-                          onClick={handleNotifOpen}
+                {session ? (
+                  <>
+                    {!isAdmin && (
+                      <>
+                        {/* Cart icon хэсэг */}
+                        <Link
+                          href="/cart"
+                          className={`relative p-2 rounded-2xl transition-colors min-w-[40px] flex justify-center items-center
+                            bg-white
+                            ${
+                              cartItems.length === 0
+                                ? "text-gray-600"
+                                : "text-black"
+                            }
+                          `}
                         >
-                          <FaBell className="h-5 w-5" />
-                          {unreadCount > 0 && (
-                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1">
-                              {unreadCount}
+                          {cartItems.length === 0 ? (
+                            // Cart хоосон үед саарал icon
+                            <FaShoppingCart className="h-5 w-5" />
+                          ) : (
+                            // Cart-д бүтээгдэхүүн байгаа үед нийт үнэ харуулах (хар текст)
+                            <span className="text-xs font-semibold select-none">
+                              Нийт үнэ: {cartTotal.toLocaleString()}₮
                             </span>
                           )}
-                        </button>
-                        {notifOpen && (
-                          <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-30 max-h-96 overflow-y-auto">
-                            <div className="p-3 border-b font-semibold text-gray-700">Мэдэгдэл</div>
-                            {notifications.length === 0 ? (
-                              <div className="p-4 text-gray-400 text-sm text-center">Мэдэгдэл алга байна</div>
-                            ) : (
-                              <ul>
-                                {notifications.map((notif, idx) => (
-                                  <li
-                                    key={idx}
-                                    className="px-4 py-3 border-b last:border-b-0 hover:bg-gray-50 text-sm cursor-pointer"
-                                    onClick={() => {
-                                      // Захиалгатай холбоотой мэдэгдэл үү гэдгийг шалгах (жишээ: title эсвэл төрөл)
-                                      if (
-                                        notif.title?.toLowerCase().includes("захиалга") ||
-                                        notif.body?.toLowerCase().includes("захиалга")
-                                      ) {
-                                        setNotifOpen(false);
-                                        router.push("/orders");
-                                      }
-                                    }}
-                                  >
-                                    <div className="font-medium text-gray-800">{notif.title || "Мэдэгдэл"}</div>
-                                    <div className="text-gray-600">{notif.body || notif.message}</div>
-                                    <div className="text-xs text-gray-400 mt-1">
-                                      {notif.date ? new Date(notif.date).toLocaleString() : ""}
-                                    </div>
-                                  </li>
-                                ))}
-                              </ul>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                      <Link href="/profile" className="p-2 text-gray-600 hover:text-green-600 transition-colors">
-                        <FaUser className="h-5 w-5" />
-                      </Link>
-                      {isAdmin && (
-                        <>
-                          <Link href="/admin/dashboard" className="p-2 text-gray-600 hover:text-green-600 transition-colors">
-                            <FaTachometerAlt className="h-5 w-5" />
-                          </Link>
-                          <Link href="/admin/coupons" className="p-2 text-gray-600 hover:text-green-600 transition-colors">
-                            <FaGift className="h-5 w-5" />
-                            <span className="ml-1"></span>
-                          </Link>
-                          <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
-                            Админ
-                          </span>
-                        </>
+                        </Link>
+                      </>
+                    )}
+                    <Link
+                      href="/favorites"
+                      className="relative p-2 text-gray-600 hover:text-green-600 transition-colors hidden lg:flex" // ← энэ нэмэлт
+                    >
+                      <FaHeart className="h-5 w-5" />
+                      {wishlist.length > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1">
+                          {wishlist.length}
+                        </span>
                       )}
-                      {/* <button
-                        onClick={handleLogout}
-                        className="p-2 text-gray-600 hover:text-red-600 transition-colors"
-                      >
-                        <FaSignOutAlt className="h-5 w-5" />
-                      </button> */}
-                    </>
-                  ) : (
-                    <div className="flex items-center gap-3">
-                      <Link
-                        href="/login"
-                        className="px-4 py-2 text-green-600 hover:text-green-700 font-medium transition-colors"
-                      >
-                        Нэвтрэх
-                      </Link>
-                      <Link
-                        href="/register"
-                        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition-colors"
-                      >
-                        Бүртгүүлэх
-                      </Link>
-                    </div>
-                  )}
-                </div>
-
-                {/* Mobile Icons */}
-                <div className="flex md:hidden items-center gap-2">
-                  <button className="p-2 text-gray-600 hover:text-green-600 transition-colors">
-                    <FaSearch className="h-5 w-5" />
-                  </button>
-                  {session && (
-                    <Link href="/cart" className="p-2 text-gray-600 hover:text-green-600 transition-colors">
-                      <FaShoppingCart className="h-5 w-5" />
                     </Link>
-                  )}
-                </div>
+
+                    {/* Notification dropdown button - Link-ийг button болгож, dropdown харуулна */}
+                    <div className="relative" ref={notifRef}>
+                      <button
+                        type="button"
+                        className="p-2 text-gray-600 hover:text-green-600 transition-colors relative"
+                        onClick={handleNotifOpen}
+                      >
+                        <FaBell className="h-5 w-5" />
+                        {unreadCount > 0 && (
+                          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full px-1">
+                            {unreadCount}
+                          </span>
+                        )}
+                      </button>
+                      {notifOpen && (
+                        <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-30 max-h-96 overflow-y-auto">
+                          <div className="p-3 border-b font-semibold text-gray-700">
+                            Мэдэгдэл
+                          </div>
+                          {notifications.length === 0 ? (
+                            <div className="p-4 text-gray-400 text-sm text-center">
+                              Мэдэгдэл алга байна
+                            </div>
+                          ) : (
+                            <ul>
+                              {notifications.map((notif, idx) => (
+                                <li
+                                  key={idx}
+                                  className="px-4 py-3 border-b last:border-b-0 hover:bg-gray-50 text-sm cursor-pointer"
+                                  onClick={() => {
+                                    // Захиалгатай холбоотой мэдэгдэл үү гэдгийг шалгах (жишээ: title эсвэл төрөл)
+                                    if (
+                                      notif.title
+                                        ?.toLowerCase()
+                                        .includes("захиалга") ||
+                                      notif.body
+                                        ?.toLowerCase()
+                                        .includes("захиалга")
+                                    ) {
+                                      setNotifOpen(false);
+                                      router.push("/orders");
+                                    }
+                                  }}
+                                >
+                                  <div className="font-medium text-gray-800">
+                                    {notif.title || "Мэдэгдэл"}
+                                  </div>
+                                  <div className="text-gray-600">
+                                    {notif.body || notif.message}
+                                  </div>
+                                  <div className="text-xs text-gray-400 mt-1">
+                                    {notif.date
+                                      ? new Date(notif.date).toLocaleString()
+                                      : ""}
+                                  </div>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    <Link
+                      href="/profile"
+                      className="p-2 text-gray-600 hover:text-green-600 transition-colors hidden lg:flex" // ← энэ нэмэлт
+                    >
+                      <FaUser className="h-5 w-5" />
+                    </Link>
+                    {isAdmin && (
+                      <>
+                        <Link
+                          href="/admin/dashboard"
+                          className="p-2 text-gray-600 hover:text-green-600 transition-colors"
+                        >
+                          <FaTachometerAlt className="h-5 w-5" />
+                        </Link>
+                        <Link
+                          href="/admin/coupons"
+                          className="p-2 text-gray-600 hover:text-green-600 transition-colors"
+                        >
+                          <FaGift className="h-5 w-5" />
+                          <span className="ml-1"></span>
+                        </Link>
+                        <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
+                          Админ
+                        </span>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <Link
+                      href="/login"
+                      className="px-4 py-2 text-green-600 hover:text-green-700 font-medium transition-colors"
+                    >
+                      Нэвтрэх
+                    </Link>
+                    <Link
+                      href="/register"
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium transition-colors"
+                    >
+                      Бүртгүүлэх
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -549,8 +593,8 @@ export default function Navbar() {
           }`}
         >
           <div className="px-4 py-6 border-t border-gray-100 bg-gray-50">
-            {/* Mobile Search */}
-            <form onSubmit={handleSearch} className="mb-6">
+            {/* Mobile Search - Already handled in main nav, but keeping for consistency if needed */}
+            {/* <form onSubmit={handleSearch} className="mb-6">
               <div className="relative">
                 <input
                   type="text"
@@ -566,7 +610,7 @@ export default function Navbar() {
                   <FaSearch className="h-4 w-4" />
                 </button>
               </div>
-            </form>
+            </form> */}
 
             {/* Mobile Navigation */}
             <div className="space-y-4">
@@ -575,6 +619,7 @@ export default function Navbar() {
                   <Link
                     href="/profile"
                     className="flex items-center gap-3 p-3 rounded-lg hover:bg-white transition-colors"
+                    onClick={() => setMenuOpen(false)} // Close menu on click
                   >
                     <FaUser className="h-5 w-5 text-gray-600" />
                     <span>Профайл</span>
@@ -584,6 +629,7 @@ export default function Navbar() {
                       <Link
                         href="/cart"
                         className="flex items-center gap-3 p-3 rounded-lg hover:bg-white transition-colors"
+                        onClick={() => setMenuOpen(false)}
                       >
                         <FaShoppingCart className="h-5 w-5 text-gray-600" />
                         <span>Сагс</span>
@@ -591,6 +637,7 @@ export default function Navbar() {
                       <Link
                         href="/orders"
                         className="flex items-center gap-3 p-3 rounded-lg hover:bg-white transition-colors"
+                        onClick={() => setMenuOpen(false)}
                       >
                         <FaClipboardList className="h-5 w-5 text-gray-600" />
                         <span>Миний захиалгууд</span>
@@ -600,6 +647,7 @@ export default function Navbar() {
                   <Link
                     href="/favorites"
                     className="flex items-center gap-3 p-3 rounded-lg hover:bg-white transition-colors"
+                    onClick={() => setMenuOpen(false)}
                   >
                     <FaHeart className="h-5 w-5 text-gray-600" />
                     <span>Дуртай</span>
@@ -609,6 +657,7 @@ export default function Navbar() {
                       <Link
                         href="/admin/dashboard"
                         className="flex items-center gap-3 p-3 rounded-lg hover:bg-white transition-colors"
+                        onClick={() => setMenuOpen(false)}
                       >
                         <FaTachometerAlt className="h-5 w-5 text-gray-600" />
                         <span>Админ самбар</span>
@@ -616,6 +665,7 @@ export default function Navbar() {
                       <Link
                         href="/admin/orders"
                         className="flex items-center gap-3 p-3 rounded-lg hover:bg-white transition-colors"
+                        onClick={() => setMenuOpen(false)}
                       >
                         <FaClipboardList className="h-5 w-5 text-gray-600" />
                         <span>Захиалгууд</span>
@@ -623,14 +673,26 @@ export default function Navbar() {
                       <Link
                         href="/admin/coupons"
                         className="flex items-center gap-3 p-3 rounded-lg hover:bg-white transition-colors"
+                        onClick={() => setMenuOpen(false)}
                       >
                         <FaGift className="h-5 w-5 text-gray-600" />
                         <span>Купон үүсгэх</span>
                       </Link>
+                      <Link
+                        href="/admin/reports"
+                        className="flex items-center gap-3 p-3 rounded-lg hover:bg-white transition-colors"
+                        onClick={() => setMenuOpen(false)}
+                      >
+                        <FaChartBar className="h-5 w-5 text-gray-600" />
+                        <span>Тайлан</span>
+                      </Link>
                     </>
                   )}
                   <button
-                    onClick={handleLogout}
+                    onClick={() => {
+                      handleLogout();
+                      setMenuOpen(false);
+                    }}
                     className="flex items-center gap-3 p-3 rounded-lg hover:bg-white transition-colors w-full text-left text-red-600"
                   >
                     <FaSignOutAlt className="h-5 w-5" />
@@ -642,12 +704,14 @@ export default function Navbar() {
                   <Link
                     href="/login"
                     className="block w-full p-3 text-center border border-green-600 text-green-600 rounded-lg hover:bg-green-50 transition-colors"
+                    onClick={() => setMenuOpen(false)}
                   >
                     Нэвтрэх
                   </Link>
                   <Link
                     href="/register"
                     className="block w-full p-3 text-center bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    onClick={() => setMenuOpen(false)}
                   >
                     Бүртгүүлэх
                   </Link>

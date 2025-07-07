@@ -1,30 +1,45 @@
 import Category from '../models/Category.js';
 import Product from '../models/Product.js';
-import mongoose from 'mongoose'
+import mongoose from 'mongoose';
+import nodemailer from "nodemailer";
+import User from "../models/User.js";
 
-export const getProductsByCategoryId = async (req, res) => {
+// Имэйл илгээх функц
+async function sendNewProductEmail(product) {
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+
+  const users = await User.find({ email: { $exists: true } }).lean();
+  const emails = users.map(u => u.email);
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: emails,
+    subject: "Шинэ бараа нэмэгдлээ!",
+    html: `
+      <h2>Манай дэлгүүрт шинэ бараа нэмэгдлээ!</h2>
+      <p><b>Нэр:</b> ${product.name}</p>
+      <p><b>Үнэ:</b> ${product.price}₮</p>
+      <p><b>Тайлбар:</b> ${product.description}</p>
+      <a href="https://localhost:3000/product/${product._id}">Дэлгэрэнгүй үзэх</a>
+    `,
+  };
+
   try {
-    const { categoryId } = req.params;
-
-    // Subcategory-уудыг авах
-    const subCategories = await Category.find({ parent: categoryId }).select('_id');
-    const subCategoryIds = subCategories.map((cat) => cat._id.toString());
-    const allCategoryIds = [categoryId, ...subCategoryIds];
-
-    // Аль ч хэлбэрээр хадгалагдсан category-г хамруулах
-    const products = await Product.find({
-      category: { $in: allCategoryIds.map(id => new mongoose.Types.ObjectId(id)) }
-    });
-
-    res.json(products);
-  } catch (err) {
-    res.status(500).json({ message: 'Алдаа гарлаа', error: err.message });
+    if (emails.length > 0) {
+      await transporter.sendMail(mailOptions);
+    }
+  } catch (mailErr) {
+    console.error("Имэйл илгээхэд алдаа:", mailErr);
   }
 }
 
-
-
-
+// Шинэ бараа нэмэх (ЗӨВХӨН НЭГ controller)
 export const createProduct = async (req, res) => {
   try {
     const { name, price, description, category, stock, discount, discountExpires } = req.body;
@@ -37,7 +52,6 @@ export const createProduct = async (req, res) => {
 
     // URL-аар ирсэн зургууд
     if (req.body.imageUrls) {
-      // imageUrls нэг ширхэг string эсвэл массив байж болно
       if (Array.isArray(req.body.imageUrls)) {
         images = images.concat(req.body.imageUrls);
       } else if (typeof req.body.imageUrls === 'string') {
@@ -70,19 +84,42 @@ export const createProduct = async (req, res) => {
       price: priceValue,
       description,
       category,
-      stock: parsedStock, // энд зөв дамжуулна
+      stock: parsedStock,
       images,
       sizes,
       discount: discountValue,
       discountPrice,
       discountExpires,
     });
+
+    // Шинэ барааны имэйл илгээх
+    await sendNewProductEmail(product);
+
     res.status(201).json(product);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 };
 
+export const getProductsByCategoryId = async (req, res) => {
+  try {
+    const { categoryId } = req.params;
+
+    // Subcategory-уудыг авах
+    const subCategories = await Category.find({ parent: categoryId }).select('_id');
+    const subCategoryIds = subCategories.map((cat) => cat._id.toString());
+    const allCategoryIds = [categoryId, ...subCategoryIds];
+
+    // Аль ч хэлбэрээр хадгалагдсан category-г хамруулах
+    const products = await Product.find({
+      category: { $in: allCategoryIds.map(id => new mongoose.Types.ObjectId(id)) }
+    });
+
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: 'Алдаа гарлаа', error: err.message });
+  }
+}
 
 export const getProducts = async (req, res) => {
   try {
@@ -116,8 +153,6 @@ export const updateProduct = async (req, res) => {
         parsedStock = stock;
       }
     }
-
-    // ...sizes, images гэх мэт бусад талбарууд...
 
     const product = await Product.findByIdAndUpdate(
       req.params.id,

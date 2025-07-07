@@ -3,6 +3,7 @@ import { Swiper, SwiperSlide } from 'swiper/react'
 import 'swiper/css'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import Image from "next/image"; // Image компонентыг импортлов
 
 import {
   MdMan, MdWoman, MdTravelExplore, MdPhoneAndroid, MdChildCare,
@@ -89,11 +90,15 @@ export default function CategorySlider({ categories }) {
                     {Icon ? (
                       <Icon className={`text-4xl ${color}`} />
                     ) : (
-                      <img
-                        src={cat.image || '/placeholder.png'}
-                        alt={cat.name}
-                        className="w-full h-full object-cover rounded-full"
-                      />
+                      <div className="relative w-full h-full">
+                        <Image
+                          src={cat.image || '/placeholder.png'}
+                          alt={cat.name}
+                          fill
+                          style={{ objectFit: "cover" }}
+                          className="rounded-full"
+                        />
+                      </div>
                     )}
                   </motion.div>
                   <motion.span

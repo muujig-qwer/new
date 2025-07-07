@@ -9,6 +9,7 @@ import { ChevronLeft, ChevronRight, Heart, Star, Clock, Home } from "lucide-reac
 import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext";
 import { useNotification } from "@/context/NotificationContext";
+import Image from "next/image"; // Image компонентыг импортлов
 
 export default function BrandProductSlider({ 
   brand, 
@@ -67,7 +68,7 @@ export default function BrandProductSlider({
                   {/* Product Image + Wishlist */}
                   <div className="relative aspect-square bg-gray-50 overflow-hidden cursor-pointer">
                     <Link href={`/products/${product._id}`}>
-                      <img
+                      <Image
                         src={
                           product.images && product.images.length > 0
                             ? product.images[0]
@@ -76,7 +77,9 @@ export default function BrandProductSlider({
                             : "/placeholder.png"
                         }
                         alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        fill
+                        style={{ objectFit: "cover" }}
+                        className="group-hover:scale-105 transition-transform duration-300"
                       />
                     </Link>
 

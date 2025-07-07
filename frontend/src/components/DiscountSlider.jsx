@@ -9,6 +9,7 @@ import { ChevronLeft, ChevronRight, Heart } from "lucide-react";
 import { useWishlist } from "@/context/WishlistContext";
 import { useCart } from "@/context/CartContext"; // cart context байгаа бол
 import { useNotification } from "@/context/NotificationContext";
+import Image from "next/image"; // Image компонентыг импортлов
 
 export default function DiscountSlider({ products }) {
   const { wishlist, addToWishlist, removeFromWishlist } = useWishlist();
@@ -79,7 +80,7 @@ export default function DiscountSlider({ products }) {
                   {/* Product Image + Link */}
                   <Link href={`/products/${product._id}`}>
                     <div className="relative aspect-square bg-gray-50 overflow-hidden cursor-pointer">
-                      <img
+                      <Image
                         src={
                           product.images && product.images.length > 0
                             ? product.images[0]
@@ -88,7 +89,9 @@ export default function DiscountSlider({ products }) {
                             : "/placeholder.png"
                         }
                         alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        fill
+                        style={{ objectFit: "cover" }}
+                        className="group-hover:scale-105 transition-transform duration-300"
                       />
                       {/* Discount Badge */}
                       {product.discount && (

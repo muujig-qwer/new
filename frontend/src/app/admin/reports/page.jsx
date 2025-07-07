@@ -1,7 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import clsx from "clsx";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   BarChart3,
   Users,
@@ -11,21 +9,118 @@ import {
   Layers,
   Settings,
   FileBarChart2,
+  DollarSign,
+  Clock,
+  UserPlus,
+  Archive,
+  Menu,
+  X,
+  Search,
+  Filter,
+  Download,
+  Eye,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import axios from "axios";
+
+const SummaryCard = ({ title, value, icon: Icon, unit = "" }) => (
+  <div className="bg-white p-4 rounded-lg shadow-sm border flex items-center gap-3">
+    <div className="bg-green-100 p-2 rounded-full flex-shrink-0">
+      <Icon className="h-5 w-5 text-green-700" />
+    </div>
+    <div className="min-w-0 flex-1">
+      <h3 className="text-xs font-medium text-gray-500 truncate">{title}</h3>
+      <p className="mt-1 text-lg font-semibold text-gray-900">
+        {value?.toLocaleString()}
+        {unit}
+      </p>
+    </div>
+  </div>
+);
+
+const ReportCard = ({ report, index, onViewReport, onToggleExpanded, isExpanded }) => (
+  <div className="bg-white border rounded-lg shadow-sm mb-3">
+    <div className="p-4">
+      <div className="flex items-start justify-between mb-2">
+        <h3 className="font-medium text-gray-900 text-sm leading-tight pr-2">
+          {report.title}
+        </h3>
+        <span
+          className={`px-2 py-1 rounded-full text-xs font-medium flex-shrink-0 ${
+            report.status === "Бэлэн"
+              ? "bg-green-100 text-green-800"
+              : "bg-yellow-100 text-yellow-800"
+          }`}
+        >
+          {report.status}
+        </span>
+      </div>
+      
+      <p className="text-xs text-gray-500 mb-3">{report.date}</p>
+      
+      <div className="flex gap-2">
+        <button
+          className="flex-1 bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 text-xs font-medium flex items-center justify-center gap-1"
+          onClick={() => onViewReport(report)}
+        >
+          <Eye className="h-3 w-3" />
+          Дэлгэрэнгүй
+        </button>
+        <button
+          className="flex-1 bg-red-600 text-white px-3 py-2 rounded-md hover:bg-red-700 text-xs font-medium flex items-center justify-center gap-1"
+          onClick={() => window.open(`http://localhost:5000/api/admin/reports/${report._id}/pdf`, '_blank')}
+        >
+          <Download className="h-3 w-3" />
+          PDF
+        </button>
+      </div>
+    </div>
+    
+    {isExpanded && (
+      <div className="border-t bg-gray-50 p-4">
+        <div className="flex justify-between items-center mb-3">
+          <h4 className="font-medium text-sm">Тайлангийн мэдээлэл</h4>
+          <button
+            className="text-gray-500 hover:text-red-500 text-xs"
+            onClick={() => onToggleExpanded(null)}
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+        <div className="text-xs text-gray-600 space-y-1">
+          <p>Төлөв: {report.status}</p>
+          <p>Сүүлд шинэчлэгдсэн: {report.date}</p>
+        </div>
+      </div>
+    )}
+  </div>
+);
 
 export default function AdminReportsPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-  const [reports, setReports] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [reports, setReports] = useState([
+    { _id: '1', title: 'Орлогын тайлан - 2024 оны 12 дугаар сар', status: 'Бэлэн', date: '2024-12-15' },
+    { _id: '2', title: 'Борлуулалтын тайлан - Сүүлийн 30 хоног', status: 'Боловсруулж байна', date: '2024-12-14' },
+    { _id: '3', title: 'Хэрэглэгчдийн статистик тайлан', status: 'Бэлэн', date: '2024-12-13' },
+    { _id: '4', title: 'Бүтээгдэхүүний нөөцийн тайлан', status: 'Бэлэн', date: '2024-12-12' },
+    { _id: '5', title: 'Захиалгын дэлгэрэнгүй тайлан', status: 'Боловсруулж байна', date: '2024-12-11' }
+  ]);
+  
+  const [loading, setLoading] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
   const [reportData, setReportData] = useState(null);
   const [reportLoading, setReportLoading] = useState(false);
   const [searchReport, setSearchReport] = useState("");
-  const [filter, setFilter] = useState({ groupBy: "day" });
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [summary, setSummary] = useState({
+    todaysRevenue: 2450000,
+    pendingOrders: 23,
+    newUsersThisMonth: 156,
+    lowStockProducts: 8
+  });
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showFilters, setShowFilters] = useState(false);
+  const [expandedReport, setExpandedReport] = useState(null);
 
   const navItems = [
     { key: "dashboard", label: "Хянах самбар", icon: BarChart3, href: "/admin/dashboard" },
@@ -38,235 +133,266 @@ export default function AdminReportsPage() {
     { key: "reports", label: "Тайлан", icon: FileBarChart2, href: "/admin/reports" },
   ];
 
-  useEffect(() => {
-    if (status === "loading") return;
-    if (status === "unauthenticated" || session?.user?.role !== "admin") {
-      router.replace("/login");
-      return;
-    }
-    axios
-      .get("http://localhost:5000/api/admin/reports")
-      .then((res) => {
-        setReports(res.data);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, [session, status, router]);
+  const handleViewReport = async (report) => {
+    setSelectedReport(report);
+    setExpandedReport(report._id);
+    setReportLoading(true);
+    setReportData(null);
+    
+    // Simulate API call
+    setTimeout(() => {
+      setReportData({ success: true, message: 'Тайлан амжилттай ачаалагдлаа' });
+      setReportLoading(false);
+    }, 1000);
+  };
 
-  const handleViewReport = async (report, customFilter = filter) => {
-  console.log("Send filter:", customFilter);  // Шалгах зорилгоор
-  setSelectedReport(report);
-  setReportLoading(true);
-  setReportData(null);
-  try {
-    const params = new URLSearchParams(customFilter).toString();
-    const res = await axios.get(`http://localhost:5000/api/admin/reports/${report._id}?${params}`);
-    setReportData(res.data);
-  } catch {
-    setReportData({ error: "Тайлан авахад алдаа гарлаа" });
-  }
-  setReportLoading(false);
-};
+  const filteredReports = useMemo(() => {
+    return reports.filter((r) => {
+      const titleMatch = r.title.toLowerCase().includes(searchReport.toLowerCase());
+      const statusMatch = statusFilter === "all" || r.status === statusFilter;
+      return titleMatch && statusMatch;
+    });
+  }, [reports, searchReport, statusFilter]);
 
-
-  if (loading) return <div>Уншиж байна...</div>;
-
-  function ReportPreview({ report, data, onFilter, filter }) {
-    if (!data) return null;
-
-    if (report._id === "orders") {
-      return (
-        <div>
-          <div className="mb-4 flex gap-2 items-center">
-            <span className="font-semibold">Бүлэглэх:</span>
-            <select
-              value={filter.groupBy}
-              onChange={e => {
-                const updatedFilter = { ...filter, groupBy: e.target.value };
-                // Хэрвээ өдөр сонговол өнөөдрийн огноог filter-д нэмнэ
-                if (e.target.value === "day") {
-                  const today = new Date().toISOString().slice(0, 10); // "2025-07-04"
-                  updatedFilter.date = today;
-                } else {
-                  delete updatedFilter.date;
-                }
-                setFilter(updatedFilter);
-                handleViewReport(report, updatedFilter);
-              }}
-              className="border p-1 rounded"
-            >
-              <option value="day">Өдөр</option>
-              <option value="month">Сар</option>
-              <option value="year">Жил</option>
-            </select>
-          </div>
-          <div className="mb-2">
-            <span className="font-semibold">Нийт захиалга:</span> {data.stats?.[0]?.totalOrders || "-"}
-          </div>
-          <div className="mb-2">
-            <span className="font-semibold">Нийт орлого:</span> {data.stats?.reduce((a, b) => a + (b.totalRevenue || 0), 0)?.toLocaleString() || "-"}₮
-          </div>
-          <div className="mb-2">
-            <span className="font-semibold">Дундаж захиалгын үнэ:</span> {data.stats?.length ? Math.round(data.stats.reduce((a, b) => a + (b.avgOrderValue || 0), 0) / data.stats.length).toLocaleString() : "-"}₮
-          </div>
-          <div className="mb-2">
-            <span className="font-semibold">Төлбөрийн төрөл:</span>
-            <ul className="list-disc ml-6">
-              <li>Wallet: {data.paymentSummary?.wallet || 0}</li>
-              <li>QR: {data.paymentSummary?.qr || 0}</li>
-              <li>Бэлэн: {data.paymentSummary?.cash || 0}</li>
-            </ul>
-          </div>
-          <div className="mb-2">
-            <span className="font-semibold">Хүргэлтийн төлөв:</span>
-            <ul className="list-disc ml-6">
-              {data.deliverySummary &&
-                Object.entries(data.deliverySummary).map(([k, v]) => (
-                  <li key={k}>{k}: {v}</li>
-                ))}
-            </ul>
-          </div>
-        </div>
-      );
-    }
-
-    // ... Та өөрийн бусад тайлангийн хэсгүүдийг мөн адил энд нэмнэ ...
-
-    return (
-      <pre className="bg-gray-100 p-2 rounded text-xs overflow-x-auto">
-        {JSON.stringify(data, null, 2)}
-      </pre>
-    );
-  }
+  const reportStatuses = useMemo(() => {
+    const statuses = new Set(reports.map((r) => r.status));
+    return ["all", ...Array.from(statuses)];
+  }, [reports]);
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
+    <div className="flex min-h-screen bg-gray-50">
+      {/* Mobile header */}
+      <header className="fixed top-0 left-0 right-0 bg-white border-b z-50 lg:hidden">
+        <div className="flex items-center justify-between p-4">
+          <div className="text-lg font-bold text-green-700">🛍 Admin Panel</div>
+          <button
+            className="p-2 rounded-md hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-green-500"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+          >
+            {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
+        </div>
+      </header>
+
       {/* Sidebar */}
-      <aside className="w-64 bg-white shadow-lg min-h-screen">
-        <div className="text-xl font-bold text-green-700 p-6">🛍 Admin Panel</div>
-        <nav className="space-y-1 px-3">
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 w-64 bg-white border-r transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static ${
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex items-center justify-between p-4 border-b lg:justify-center">
+          <div className="text-lg font-bold text-green-700">🛍 Admin Panel</div>
+          <button
+            className="p-2 rounded-md hover:bg-gray-100 lg:hidden"
+            onClick={() => setSidebarOpen(false)}
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        
+        <nav className="p-4 space-y-2">
           {navItems.map(({ key, label, icon: Icon, href }) => (
-            <Link
+            <a
               key={key}
               href={href}
-              className={clsx(
-                "flex items-center gap-3 px-4 py-3 rounded hover:bg-green-100 text-sm",
+              className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                 key === "reports"
-                  ? "bg-green-200 text-green-900 font-medium"
-                  : "text-gray-700"
-              )}
+                  ? "bg-green-100 text-green-700"
+                  : "text-gray-700 hover:bg-gray-100"
+              }`}
+              onClick={() => setSidebarOpen(false)}
             >
               <Icon className="h-5 w-5" />
               {label}
-            </Link>
+            </a>
           ))}
         </nav>
       </aside>
 
-      {/* Content */}
-      <main className="flex-1 p-10">
-        <div className="max-w-3xl mx-auto">
-          <h1 className="text-3xl font-bold mb-6">Тайлан</h1>
+      {/* Sidebar overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 lg:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
 
-          <div className="mb-4 flex gap-2 items-center">
-            <input
-              type="text"
-              placeholder="Тайлангийн нэрээр хайх..."
-              className="border p-2 rounded flex-1"
-              value={searchReport}
-              onChange={e => setSearchReport(e.target.value)}
-            />
-          </div>
+      {/* Main content */}
+      <main className="flex-1 pt-16 lg:pt-0">
+        <div className="p-4 lg:p-8">
+          <div className="max-w-7xl mx-auto">
+            <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-6">Тайлангийн самбар</h1>
 
-          <div className="overflow-x-auto">
-            <table className="min-w-full bg-white border rounded">
-              <thead>
-                <tr>
-                  <th className="p-2 border">#</th>
-                  <th className="p-2 border">Тайлангийн нэр</th>
-                  <th className="p-2 border">Огноо</th>
-                  <th className="p-2 border">Төлөв</th>
-                  <th className="p-2 border">Үйлдэл</th>
-                </tr>
-              </thead>
-              <tbody>
-                {reports.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className="text-center p-4">Тайлан олдсонгүй</td>
-                  </tr>
+            {/* Summary Cards */}
+            {summaryLoading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="bg-white p-4 rounded-lg shadow-sm animate-pulse">
+                    <div className="h-4 bg-gray-200 rounded w-1/2 mb-2"></div>
+                    <div className="h-6 bg-gray-300 rounded w-3/4"></div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              summary && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                  <SummaryCard title="Өнөөдрийн орлого" value={summary.todaysRevenue} icon={DollarSign} unit="₮" />
+                  <SummaryCard title="Хүлээгдэж буй захиалга" value={summary.pendingOrders} icon={Clock} />
+                  <SummaryCard title="Энэ сарын шинэ хэрэглэгчид" value={summary.newUsersThisMonth} icon={UserPlus} />
+                  <SummaryCard title="Нөөц багатай бараа" value={summary.lowStockProducts} icon={Archive} />
+                </div>
+              )
+            )}
+
+            {/* Reports Section */}
+            <div className="bg-white rounded-lg shadow-sm border">
+              <div className="p-4 border-b">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">Тайлангийн жагсаалт</h2>
+                
+                {/* Search and Filter Toggle */}
+                <div className="space-y-3">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Тайлангийн нэрээр хайх..."
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      value={searchReport}
+                      onChange={(e) => setSearchReport(e.target.value)}
+                    />
+                  </div>
+                  
+                  <button
+                    className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm font-medium"
+                    onClick={() => setShowFilters(!showFilters)}
+                  >
+                    <Filter className="h-4 w-4" />
+                    Шүүлтүүр
+                    {showFilters ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  </button>
+                </div>
+
+                {/* Filters */}
+                {showFilters && (
+                  <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Төлөв</label>
+                        <select
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                          value={statusFilter}
+                          onChange={(e) => setStatusFilter(e.target.value)}
+                        >
+                          {reportStatuses.map((status) => (
+                            <option key={status} value={status}>
+                              {status === "all" ? "Бүгд" : status}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Reports List - Mobile Cards */}
+              <div className="lg:hidden">
+                {loading ? (
+                  <div className="p-4 space-y-3">
+                    {[...Array(3)].map((_, i) => (
+                      <div key={i} className="bg-white border rounded-lg p-4 animate-pulse">
+                        <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                        <div className="h-3 bg-gray-200 rounded w-1/2 mb-3"></div>
+                        <div className="flex gap-2">
+                          <div className="h-8 bg-gray-200 rounded flex-1"></div>
+                          <div className="h-8 bg-gray-200 rounded flex-1"></div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : filteredReports.length === 0 ? (
+                  <div className="p-8 text-center text-gray-500">
+                    <FileBarChart2 className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                    <p>Тайлан олдсонгүй</p>
+                  </div>
                 ) : (
-                  reports
-                    .filter(r =>
-                      r.title.toLowerCase().includes(searchReport.toLowerCase())
-                    )
-                    .map((report, idx) => (
-                      <tr key={report._id || idx}>
-                        <td className="p-2 border">{idx + 1}</td>
-                        <td className="p-2 border">{report.title}</td>
-                        <td className="p-2 border">{report.date}</td>
-                        <td className="p-2 border">{report.status}</td>
-                        <td className="p-2 border flex gap-2">
-                          <button
-                            className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-xs"
-                            onClick={() => handleViewReport(report)}
-                          >
-                            Дэлгэрэнгүй
-                          </button>
-                          <a
-                            href={`/api/admin/reports/${report._id}/csv`}
-                            className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-xs"
-                            download
-                          >
-                            CSV татах
-                          </a>
+                  <div className="p-4 space-y-3">
+                    {filteredReports.map((report, idx) => (
+                      <ReportCard
+                        key={report._id}
+                        report={report}
+                        index={idx}
+                        onViewReport={handleViewReport}
+                        onToggleExpanded={setExpandedReport}
+                        isExpanded={expandedReport === report._id}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Reports Table - Desktop */}
+              <div className="hidden lg:block overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-gray-50 border-b">
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Тайлангийн нэр</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Сүүлд шинэчлэгдсэн</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Төлөв</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Үйлдэл</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {filteredReports.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                          Тайлан олдсонгүй
                         </td>
                       </tr>
-                    ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {selectedReport && (
-            <div className="mt-8 p-4 border rounded bg-white">
-              <div className="flex justify-between items-center mb-2">
-                <h2 className="text-xl font-bold">{selectedReport.title} - дэлгэрэнгүй</h2>
-                <button
-                  className="text-gray-500 hover:text-red-500"
-                  onClick={() => { setSelectedReport(null); setReportData(null); }}
-                >
-                  Хаах
-                </button>
+                    ) : (
+                      filteredReports.map((report, idx) => (
+                        <tr key={report._id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{idx + 1}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{report.title}</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{report.date}</td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span
+                              className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                report.status === "Бэлэн"
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-yellow-100 text-yellow-800"
+                              }`}
+                            >
+                              {report.status}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div className="flex gap-2">
+                              <button
+                                className="text-blue-600 hover:text-blue-900 flex items-center gap-1"
+                                onClick={() => handleViewReport(report)}
+                              >
+                                <Eye className="h-4 w-4" />
+                                Дэлгэрэнгүй
+                              </button>
+                              <button
+                                className="text-red-600 hover:text-red-900 flex items-center gap-1"
+                                onClick={() => window.open(`http://localhost:5000/api/admin/reports/${report._id}/pdf`, '_blank')}
+                              >
+                                <Download className="h-4 w-4" />
+                                PDF
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
               </div>
-              <div className="mb-4 flex gap-2 items-center">
-                <input
-                  type="text"
-                  placeholder="Нэр, утгаар хайх..."
-                  className="border p-2 rounded flex-1"
-                  onChange={e => {
-                    const f = { ...filter, search: e.target.value };
-                    setFilter(f);
-                    handleViewReport(selectedReport, f);
-                  }}
-                />
-              </div>
-              {reportLoading ? (
-                <div>Уншиж байна...</div>
-              ) : reportData?.error ? (
-                <div className="text-red-600">{reportData.error}</div>
-              ) : (
-                <ReportPreview
-                  report={selectedReport}
-                  data={reportData}
-                  filter={filter}
-                  onFilter={f => {
-                    setFilter(f);
-                    handleViewReport(selectedReport, f);
-                  }}
-                />
-              )}
             </div>
-          )}
+          </div>
         </div>
       </main>
     </div>
