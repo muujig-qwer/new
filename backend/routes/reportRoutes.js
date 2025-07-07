@@ -9,6 +9,7 @@ import {
   deliveryReport,
   orderReportCsv,
   lowStockReport,
+  downloadReportPdf,
 } from "../controllers/reportController.js";
 
 const router = express.Router();
@@ -22,5 +23,6 @@ router.get("/revenue", revenueReport);
 router.get("/delivery", deliveryReport);
 router.get("/orders/csv", orderReportCsv);
 router.get("/lowstock", lowStockReport);
+router.get("/:id/pdf", downloadReportPdf); // ← зөвхөн энэ
 
 export default router;

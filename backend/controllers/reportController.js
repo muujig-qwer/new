@@ -4,6 +4,7 @@ import User from "../models/User.js";
 import Coupon from "../models/Coupon.js";
 import Category from "../models/Category.js";
 import { Parser } from "json2csv";
+import puppeteer from "puppeteer";
 
 // 1. Захиалгын тайлан
 export const orderReport = async (req, res) => {
@@ -13,13 +14,16 @@ export const orderReport = async (req, res) => {
     if (groupBy === "month") dateFormat = "%Y-%m";
     if (groupBy === "year") dateFormat = "%Y";
 
-    // ↓↓↓ Өдрийн filter нэмэх ↓↓↓
+    // from/to filter
     const match = {};
-    if (req.query.date && groupBy === "day") {
-      const start = new Date(req.query.date);
-      const end = new Date(req.query.date);
-      end.setDate(end.getDate() + 1);
-      match.createdAt = { $gte: start, $lt: end };
+    if (req.query.from) {
+      match.createdAt = { ...match.createdAt, $gte: new Date(req.query.from) };
+    }
+    if (req.query.to) {
+      // to-г дуусах өдрийн 23:59:59 болгоно
+      const toDate = new Date(req.query.to);
+      toDate.setHours(23, 59, 59, 999);
+      match.createdAt = { ...match.createdAt, $lte: toDate };
     }
 
     const stats = await Order.aggregate([
@@ -269,13 +273,33 @@ export const deliveryReport = async (req, res) => {
       { $group: { _id: "$status", count: { $sum: 1 } } },
     ]);
     const companies = await Order.aggregate([
-      { $match: { delivery: { $exists: true, $ne: null, ...(search ? { $regex: search, $options: "i" } : {}) } } },
+      { $match: { delivery: { $exists: true, $ne: null } } },
       {
         $group: {
           _id: "$delivery",
           delivered: { $sum: 1 },
         },
       },
+      {
+        $lookup: {
+          from: "users",
+          localField: "_id",
+          foreignField: "_id",
+          as: "user"
+        }
+      },
+      {
+        $unwind: {
+          path: "$user",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+          delivered: 1,
+          name: "$user.name"
+        }
+      }
     ]);
     res.json({
       status,
@@ -307,7 +331,10 @@ export const orderReportCsv = async (req, res) => {
 export const lowStockReport = async (req, res) => {
   try {
     const threshold = Number(req.query.threshold) || 5; // default 5-аас доош
-    const products = await Product.find({ stock: { $lte: threshold } }).lean();
+    // stock массивын аль нэг quantity бага бол
+    const products = await Product.find({
+      stock: { $elemMatch: { quantity: { $lte: threshold } } }
+    }).lean();
     res.json({
       count: products.length,
       products,
@@ -329,4 +356,280 @@ export const reportList = (req, res) => {
     { _id: "delivery", title: "Хүргэлтийн тайлан", date: "2025-07-04", status: "Бэлэн" },
     { _id: "lowstock", title: "Нөөц багатай бүтээгдэхүүн", date: "2025-07-04", status: "Бэлэн" },
   ]);
+};
+
+export const downloadReportPdf = async (req, res) => {
+  const reportId = req.params.id;
+  let data = {};
+  let tableHtml = ""; // ← энэ мөрийг нэм
+
+  if (reportId === "orders") {
+    const stats = await Order.aggregate([
+      {
+        $addFields: {
+          createdAtDate: {
+            $cond: [
+              { $isNumber: "$createdAt" },
+              { $toDate: "$createdAt" },
+              "$createdAt"
+            ]
+          }
+        }
+      },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAtDate" } },
+          totalOrders: { $sum: 1 },
+          totalRevenue: { $sum: "$totalPrice" },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+    data.stats = stats;
+    tableHtml = `
+      <table>
+        <thead>
+          <tr>
+            <th>Огноо</th>
+            <th>Захиалга</th>
+            <th>Орлого</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.stats?.map(row => `
+            <tr>
+              <td>${row._id}</td>
+              <td>${row.totalOrders}</td>
+              <td>${row.totalRevenue?.toLocaleString()}₮</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+  } else if (reportId === "products") {
+    const products = await Product.find().lean();
+    data.products = products;
+    tableHtml = `
+      <table>
+        <thead>
+          <tr>
+            <th>Бүтээгдэхүүн</th>
+            <th>Үлдэгдэл</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.products?.map(p => `
+            <tr>
+              <td>${p.name}</td>
+              <td>
+                ${Array.isArray(p.stock) && p.stock.length > 0
+                  ? p.stock.map(s => `${s.color}: ${s.quantity}`).join(", ")
+                  : "-"}
+              </td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+  } else if (reportId === "users") {
+    const users = await User.find().lean();
+    data.users = users;
+    tableHtml = `
+      <table>
+        <thead>
+          <tr>
+            <th>Нэр</th>
+            <th>И-мэйл</th>
+            <th>Төрөл</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.users?.map(u => `
+            <tr>
+              <td>${u.name}</td>
+              <td>${u.email}</td>
+              <td>${u.role}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+  } else if (reportId === "coupons") {
+    // Купон ашиглалтын тайлан
+    const usedCoupons = await Order.aggregate([
+      { $match: { "coupon.code": { $exists: true, $ne: null } } },
+      { $group: { _id: "$coupon.code", used: { $sum: 1 }, totalSaved: { $sum: "$coupon.discountAmount" } } },
+      { $sort: { used: -1 } },
+    ]);
+    data.coupons = usedCoupons;
+    tableHtml = `
+      <table>
+        <thead>
+          <tr>
+            <th>Купон код</th>
+            <th>Ашигласан тоо</th>
+            <th>Нийт хэмнэлт</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.coupons?.map(c => `
+            <tr>
+              <td>${c._id}</td>
+              <td>${c.used}</td>
+              <td>${c.totalSaved?.toLocaleString()}₮</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+  } else if (reportId === "revenue") {
+    // Орлогын график / статистик
+    const daily = await Order.aggregate([
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          revenue: { $sum: "$totalPrice" },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+    data.daily = daily;
+    tableHtml = `
+      <table>
+        <thead>
+          <tr>
+            <th>Огноо</th>
+            <th>Орлого</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.daily?.map(r => `
+            <tr>
+              <td>${r._id}</td>
+              <td>${r.revenue?.toLocaleString()}₮</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+  } else if (reportId === "delivery") {
+    // Хүргэлтийн тайлан
+    const status = await Order.aggregate([
+      { $group: { _id: "$status", count: { $sum: 1 } } },
+    ]);
+    const companies = await Order.aggregate([
+      { $match: { delivery: { $exists: true, $ne: null } } },
+      {
+        $group: {
+          _id: "$delivery",
+          delivered: { $sum: 1 },
+        },
+      },
+    ]);
+    data.status = status;
+    data.companies = companies;
+    tableHtml = `
+      <div>
+        <div style="font-weight:bold;margin-bottom:8px;">Хүргэлтийн төлөв:</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Төлөв</th>
+              <th>Тоо</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.status?.map(s => `
+              <tr>
+                <td>${s._id}</td>
+                <td>${s.count}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+        <div style="font-weight:bold;margin:16px 0 8px;">Хүргэлтийн компаниуд:</div>
+        <table>
+          <thead>
+            <tr>
+              <th>Компани/Ажилтан ID</th>
+              <th>Хүргэлтийн тоо</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.companies?.map(c => `
+              <tr>
+                <td>${c._id}</td>
+                <td>${c.delivered}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>
+    `;
+  } else if (reportId === "lowstock") {
+    // Нөөц багатай бүтээгдэхүүн
+    const threshold = 5;
+    const products = await Product.find({
+      stock: { $elemMatch: { quantity: { $lte: threshold } } }
+    }).lean();
+    data.products = products;
+    tableHtml = `
+      <table>
+        <thead>
+          <tr>
+            <th>Бүтээгдэхүүний нэр</th>
+            <th>Үлдэгдэл (өнгө тус бүр)</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.products?.map(p => `
+            <tr>
+              <td>${p.name}</td>
+              <td>
+                ${p.stock
+                  .filter(s => s.quantity <= threshold)
+                  .map(s => `${s.color}: ${s.quantity}`)
+                  .join(", ")}
+              </td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+  }
+
+  const html = `
+    <html>
+      <head>
+        <meta charset="UTF-8" />
+        <style>
+          body { font-family: Arial; }
+          table { border-collapse: collapse; width: 100%; }
+          th, td { border: 1px solid #ccc; padding: 8px; }
+          th { background: #f0f0f0; }
+        </style>
+      </head>
+      <body>
+        <h2>Тайлан: ${reportId}</h2>
+        ${tableHtml}
+      </body>
+    </html>
+  `;
+
+  // Puppeteer ашиглан PDF үүсгэх
+  const browser = await puppeteer.launch({
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    headless: true,
+  });
+  const page = await browser.newPage();
+  await page.setContent(html, { waitUntil: "networkidle0" });
+  const pdfBuffer = await page.pdf({ format: "A4" });
+  await browser.close();
+
+  res.set({
+    "Content-Type": "application/pdf",
+    "Content-Disposition": `attachment; filename=${reportId}.pdf`,
+    "Content-Length": pdfBuffer.length,
+  });
+  res.send(pdfBuffer);
 };

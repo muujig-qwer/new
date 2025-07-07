@@ -74,11 +74,11 @@ export default function HomePage() {
 
   return (
     <div className="text-gray-800 font-montserrat">
-      <section className="max-w-7xl mx-auto px-4 pt-6">
+      <section className="max-w-7xl mx-auto sm:px-4 px-2 pt-6">
         <CategorySlider categories={parentCategories} />
       </section>
 
-      <section className="max-w-7xl mx-auto px-4 pt-0 bg-white rounded-xl shadow">
+      <section className="max-w-7xl mx-auto sm:px-4 px-2 pt-0 bg-white rounded-xl shadow">
         <DiscountSlider products={featuredProducts} />
       </section>
 
@@ -88,10 +88,10 @@ export default function HomePage() {
         return (
           <section
             key={cat.id}
-            className="max-w-7xl mx-auto px-4 pt-0 mt-8 bg-white rounded-xl shadow"
+            className="max-w-7xl mx-auto sm:px-4 px-2 pt-0 sm:mt-8 mt-4 bg-white rounded-xl shadow"
           >
-            <div className="flex items-center justify-between mb-4 px-2 pt-4">
-              <h2 className="text-xl font-bold">{cat.name}</h2>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between sm:mb-4 mb-2 sm:px-2 px-0 sm:pt-4 pt-2 gap-2">
+              <h2 className="text-lg sm:text-xl font-bold">{cat.name}</h2>
               <Link
                 href={
                   cat.name === "Гар утас"
@@ -113,7 +113,6 @@ export default function HomePage() {
           </section>
         );
       })}
-
     </div>
   );
 }

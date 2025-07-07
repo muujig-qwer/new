@@ -1,4 +1,5 @@
 "use client";
+import React from "react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import clsx from "clsx";
@@ -74,6 +75,7 @@ export default function AdminReportsPage() {
   function ReportPreview({ report, data, onFilter, filter }) {
     if (!data) return null;
 
+    // Захиалгын тайлан
     if (report._id === "orders") {
       return (
         <div>
@@ -83,13 +85,6 @@ export default function AdminReportsPage() {
               value={filter.groupBy}
               onChange={e => {
                 const updatedFilter = { ...filter, groupBy: e.target.value };
-                // Хэрвээ өдөр сонговол өнөөдрийн огноог filter-д нэмнэ
-                if (e.target.value === "day") {
-                  const today = new Date().toISOString().slice(0, 10); // "2025-07-04"
-                  updatedFilter.date = today;
-                } else {
-                  delete updatedFilter.date;
-                }
                 setFilter(updatedFilter);
                 handleViewReport(report, updatedFilter);
               }}
@@ -99,6 +94,28 @@ export default function AdminReportsPage() {
               <option value="month">Сар</option>
               <option value="year">Жил</option>
             </select>
+            <input
+              type="date"
+              value={filter.from || ""}
+              onChange={e => {
+                const updatedFilter = { ...filter, from: e.target.value };
+                setFilter(updatedFilter);
+                handleViewReport(report, updatedFilter);
+              }}
+              className="border p-1 rounded"
+              placeholder="Эхлэх огноо"
+            />
+            <input
+              type="date"
+              value={filter.to || ""}
+              onChange={e => {
+                const updatedFilter = { ...filter, to: e.target.value };
+                setFilter(updatedFilter);
+                handleViewReport(report, updatedFilter);
+              }}
+              className="border p-1 rounded"
+              placeholder="Дуусах огноо"
+            />
           </div>
           <div className="mb-2">
             <span className="font-semibold">Нийт захиалга:</span> {data.stats?.[0]?.totalOrders || "-"}
@@ -126,12 +143,251 @@ export default function AdminReportsPage() {
                 ))}
             </ul>
           </div>
+          <table className="min-w-full bg-white border rounded text-sm mb-2">
+            <thead>
+              <tr>
+                <th className="p-2 border">Огноо</th>
+                <th className="p-2 border">Захиалга</th>
+                <th className="p-2 border">Орлого</th>
+                <th className="p-2 border">Дундаж үнэ</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.stats?.map((row, i) => (
+                <tr key={row.date || row._id || i}>
+                  <td className="p-2 border">{row.date || row._id}</td>
+                  <td className="p-2 border">{row.totalOrders}</td>
+                  <td className="p-2 border">{row.totalRevenue?.toLocaleString()}₮</td>
+                  <td className="p-2 border">{row.avgOrderValue?.toLocaleString()}₮</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       );
     }
 
-    // ... Та өөрийн бусад тайлангийн хэсгүүдийг мөн адил энд нэмнэ ...
+    // Барааны борлуулалтын тайлан
+    if (report._id === "products") {
+      return (
+        <div>
+          <table className="min-w-full bg-white border rounded text-sm mb-2">
+            <thead>
+              <tr>
+                <th className="p-2 border">#</th>
+                <th className="p-2 border">Бүтээгдэхүүн</th>
+                <th className="p-2 border">Үлдэгдэл</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.products?.map((p, i) => (
+                <tr key={p._id}>
+                  <td className="p-2 border">{i + 1}</td>
+                  <td className="p-2 border">{p.name}</td>
+                  <td className="p-2 border">
+                    {Array.isArray(p.stock) && p.stock.length > 0
+                      ? p.stock.map(s => (
+                          <span key={s._id} className="inline-block mr-2">
+                            <span
+                              style={{
+                                display: "inline-block",
+                                width: 14,
+                                height: 14,
+                                background: s.color,
+                                borderRadius: "50%",
+                                marginRight: 4,
+                                border: "1px solid #ccc",
+                                verticalAlign: "middle"
+                              }}
+                              title={s.color}
+                            ></span>
+                            {s.quantity}
+                          </span>
+                        ))
+                      : "-"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
 
+    // Хэрэглэгчийн тайлан
+    if (report._id === "users") {
+      return (
+        <div>
+          <table className="min-w-full bg-white border rounded text-sm mb-2">
+            <thead>
+              <tr>
+                <th className="p-2 border">#</th>
+                <th className="p-2 border">Нэр</th>
+                <th className="p-2 border">И-мэйл</th>
+                <th className="p-2 border">Төрөл</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.users?.map((u, i) => (
+                <tr key={u._id}>
+                  <td className="p-2 border">{i + 1}</td>
+                  <td className="p-2 border">{u.name}</td>
+                  <td className="p-2 border">{u.email}</td>
+                  <td className="p-2 border">{u.role}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
+
+    // Купон ашиглалтын тайлан
+    if (report._id === "coupons") {
+      return (
+        <div>
+          <table className="min-w-full bg-white border rounded text-sm mb-2">
+            <thead>
+              <tr>
+                <th className="p-2 border">Купон код</th>
+                <th className="p-2 border">Ашигласан тоо</th>
+                <th className="p-2 border">Нийт хэмнэлт</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.topCoupons?.map((c, i) => (
+                <tr key={c._id || i}>
+                  <td className="p-2 border">{c._id}</td>
+                  <td className="p-2 border">{c.used}</td>
+                  <td className="p-2 border">{c.totalSaved?.toLocaleString()}₮</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div>Нийт ашигласан купон: {data.totalUsed}</div>
+          <div>Нийт хэмнэсэн дүн: {data.totalSaved?.toLocaleString()}₮</div>
+        </div>
+      );
+    }
+
+    // Орлогын тайлан
+    if (report._id === "revenue") {
+      return (
+        <div>
+          <table className="min-w-full bg-white border rounded text-sm mb-2">
+            <thead>
+              <tr>
+                <th className="p-2 border">Огноо</th>
+                <th className="p-2 border">Орлого</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.daily?.map((row, i) => (
+                <tr key={row._id || i}>
+                  <td className="p-2 border">{row._id}</td>
+                  <td className="p-2 border">{row.revenue?.toLocaleString()}₮</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
+
+    // Хүргэлтийн тайлан
+    if (report._id === "delivery") {
+      return (
+        <div>
+          <div className="mb-2 font-semibold">Хүргэлтийн төлөв:</div>
+          <table className="min-w-full bg-white border rounded text-sm mb-2">
+            <thead>
+              <tr>
+                <th className="p-2 border">Төлөв</th>
+                <th className="p-2 border">Тоо</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.status?.map((s, i) => (
+                <tr key={s._id || i}>
+                  <td className="p-2 border">{s._id}</td>
+                  <td className="p-2 border">{s.count}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div className="mb-2 font-semibold">Хүргэлтийн компаниуд:</div>
+          <table className="min-w-full bg-white border rounded text-sm">
+            <thead>
+              <tr>
+                <th className="p-2 border">Компани/Ажилтан ID</th>
+                <th className="p-2 border">Хүргэлтийн тоо</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.companies?.map((c, i) => (
+                <tr key={c._id || i}>
+                  <td className="p-2 border">
+                    {c.name ? c.name : c._id}
+                  </td>
+                  <td className="p-2 border">{c.delivered}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      );
+    }
+
+    // Нөөц багатай бүтээгдэхүүн
+    if (report._id === "lowstock") {
+      return (
+        <div>
+          <div className="mb-2 font-semibold">Нөөц багатай бүтээгдэхүүнүүд:</div>
+          <table className="min-w-full bg-white border rounded text-sm mb-2">
+            <thead>
+              <tr>
+                <th className="p-2 border">#</th>
+                <th className="p-2 border">Бүтээгдэхүүний нэр</th>
+                <th className="p-2 border">Үлдэгдэл (өнгө тус бүр)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.products?.map((p, i) => (
+                <tr key={p._id}>
+                  <td className="p-2 border">{i + 1}</td>
+                  <td className="p-2 border">{p.name}</td>
+                  <td className="p-2 border">
+                    {p.stock
+                      .filter(s => s.quantity <= (filter.threshold || 5))
+                      .map(s => (
+                        <span key={s._id} className="inline-block mr-2">
+                          <span
+                            style={{
+                              display: "inline-block",
+                              width: 12,
+                              height: 12,
+                              background: s.color,
+                              borderRadius: "50%",
+                              marginRight: 4,
+                              border: "1px solid #ccc",
+                              verticalAlign: "middle"
+                            }}
+                            title={s.color}
+                          ></span>
+                          {s.quantity}
+                        </span>
+                      ))}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <div>Нийт: {data.count} бүтээгдэхүүн</div>
+        </div>
+      );
+    }
+
+    // Бусад тайланд JSON fallback
     return (
       <pre className="bg-gray-100 p-2 rounded text-xs overflow-x-auto">
         {JSON.stringify(data, null, 2)}
@@ -196,77 +452,82 @@ export default function AdminReportsPage() {
                   </tr>
                 ) : (
                   reports
-                    .filter(r =>
-                      r.title.toLowerCase().includes(searchReport.toLowerCase())
-                    )
+                    .filter(r => r.title.toLowerCase().includes(searchReport.toLowerCase()))
                     .map((report, idx) => (
-                      <tr key={report._id || idx}>
-                        <td className="p-2 border">{idx + 1}</td>
-                        <td className="p-2 border">{report.title}</td>
-                        <td className="p-2 border">{report.date}</td>
-                        <td className="p-2 border">{report.status}</td>
-                        <td className="p-2 border flex gap-2">
-                          <button
-                            className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-xs"
-                            onClick={() => handleViewReport(report)}
-                          >
-                            Дэлгэрэнгүй
-                          </button>
-                          <a
-                            href={`/api/admin/reports/${report._id}/csv`}
-                            className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-xs"
-                            download
-                          >
-                            CSV татах
-                          </a>
-                        </td>
-                      </tr>
+                      <React.Fragment key={report._id || idx}>
+                        <tr>
+                          <td className="p-2 border">{idx + 1}</td>
+                          <td className="p-2 border">{report.title}</td>
+                          <td className="p-2 border">{report.date}</td>
+                          <td className="p-2 border">{report.status}</td>
+                          <td className="p-2 border flex gap-2">
+                            <button
+                              className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-xs"
+                              onClick={() => handleViewReport(report)}
+                            >
+                              Дэлгэрэнгүй
+                            </button>
+                            <a
+                              href={`http://localhost:5000/api/admin/reports/${report._id}/pdf`}
+                              className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 text-xs"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              PDF татах
+                            </a>
+                          </td>
+                        </tr>
+                        {/* Зөвхөн сонгогдсон тайлан дэлгэрэнгүйг харуулна */}
+                        {selectedReport && selectedReport._id === report._id && (
+                          <tr>
+                            <td colSpan={5} className="p-0">
+                              <div className="p-4 border-t bg-white">
+                                <div className="flex justify-between items-center mb-2">
+                                  <h2 className="text-xl font-bold">{selectedReport.title} - дэлгэрэнгүй</h2>
+                                  <button
+                                    className="text-gray-500 hover:text-red-500"
+                                    onClick={() => { setSelectedReport(null); setReportData(null); }}
+                                  >
+                                    Хаах
+                                  </button>
+                                </div>
+                                <div className="mb-4 flex gap-2 items-center">
+                                  <input
+                                    type="text"
+                                    placeholder="Нэр, утгаар хайх..."
+                                    className="border p-2 rounded flex-1"
+                                    onChange={e => {
+                                      const f = { ...filter, search: e.target.value };
+                                      setFilter(f);
+                                      handleViewReport(selectedReport, f);
+                                    }}
+                                  />
+                                </div>
+                                {reportLoading ? (
+                                  <div>Уншиж байна...</div>
+                                ) : reportData?.error ? (
+                                  <div className="text-red-600">{reportData.error}</div>
+                                ) : (
+                                  <ReportPreview
+                                    report={selectedReport}
+                                    data={reportData}
+                                    filter={filter}
+                                    onFilter={f => {
+                                      setFilter(f);
+                                      handleViewReport(selectedReport, f);
+                                    }}
+                                  />
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
                     ))
                 )}
               </tbody>
             </table>
           </div>
-
-          {selectedReport && (
-            <div className="mt-8 p-4 border rounded bg-white">
-              <div className="flex justify-between items-center mb-2">
-                <h2 className="text-xl font-bold">{selectedReport.title} - дэлгэрэнгүй</h2>
-                <button
-                  className="text-gray-500 hover:text-red-500"
-                  onClick={() => { setSelectedReport(null); setReportData(null); }}
-                >
-                  Хаах
-                </button>
-              </div>
-              <div className="mb-4 flex gap-2 items-center">
-                <input
-                  type="text"
-                  placeholder="Нэр, утгаар хайх..."
-                  className="border p-2 rounded flex-1"
-                  onChange={e => {
-                    const f = { ...filter, search: e.target.value };
-                    setFilter(f);
-                    handleViewReport(selectedReport, f);
-                  }}
-                />
-              </div>
-              {reportLoading ? (
-                <div>Уншиж байна...</div>
-              ) : reportData?.error ? (
-                <div className="text-red-600">{reportData.error}</div>
-              ) : (
-                <ReportPreview
-                  report={selectedReport}
-                  data={reportData}
-                  filter={filter}
-                  onFilter={f => {
-                    setFilter(f);
-                    handleViewReport(selectedReport, f);
-                  }}
-                />
-              )}
-            </div>
-          )}
         </div>
       </main>
     </div>
