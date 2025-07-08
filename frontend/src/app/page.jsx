@@ -28,10 +28,10 @@ export default function HomePage() {
       .then((res) => setCategories(res.data));
     axios
       .get("http://localhost:5000/api/products?featured=true")
-      .then((res) => setFeaturedProducts(res.data));
+      .then((res) => setFeaturedProducts(res.data.products || []));
     axios
       .get("http://localhost:5000/api/products")
-      .then((res) => setAllProducts(res.data));
+      .then((res) => setAllProducts(res.data.products || []));
   }, []);
 
   const parentCategories = categories.filter((cat) => !cat.parent);

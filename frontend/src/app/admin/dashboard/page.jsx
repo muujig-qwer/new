@@ -1,5 +1,4 @@
 "use client";
-
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -15,6 +14,7 @@ import {
   FileBarChart2,
   TrendingUp,
   UserPlus,
+  Menu,
 } from "lucide-react";
 import Link from "next/link";
 import clsx from "clsx";
@@ -22,10 +22,7 @@ import clsx from "clsx";
 export default function AdminDashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-
-  // Sidebar toggle state
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [stats, setStats] = useState({ products: 0, users: 0, orders: 0 });
   const [monthlyStats, setMonthlyStats] = useState(null);
 
@@ -36,20 +33,13 @@ export default function AdminDashboardPage() {
     { href: "/admin/users", label: "Хэрэглэгчид", icon: Users },
     { href: "/admin/categories", label: "Ангилал", icon: Tag },
     { href: "/admin/coupons", label: "Купон", icon: Layers },
-    { href: "/admin/settings", label: "Тохиргоо", icon: Settings },
     { href: "/admin/reports", label: "Тайлан", icon: FileBarChart2 },
   ];
 
   useEffect(() => {
     if (status === "loading") return;
-    if (!session) {
-      router.replace("/login");
-      return;
-    }
-    if (session.user?.role !== "admin") {
-      router.replace("/");
-      return;
-    }
+    if (!session) router.replace("/login");
+    if (session?.user?.role !== "admin") router.replace("/");
   }, [session, status, router]);
 
   useEffect(() => {
@@ -66,7 +56,7 @@ export default function AdminDashboardPage() {
             }),
           ]);
           setStats({
-            products: productsRes.data.length,
+            products: Array.isArray(productsRes.data.products) ? productsRes.data.products.length : 0,
             users: usersRes.data.length,
             orders: ordersRes.data.length,
           });
@@ -88,45 +78,29 @@ export default function AdminDashboardPage() {
   if (status === "loading") return <div>Ачааллаж байна...</div>;
 
   return (
-    <>
-      {/* Mobile toggle button */}
+    <div className="flex min-h-screen bg-gray-100">
+      {/* Sidebar toggle button for mobile */}
       <button
-        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded bg-green-600 text-white shadow"
-        onClick={() => setSidebarOpen(true)}
-        aria-label="Sidebar нээх"
+        className="md:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded shadow"
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
       >
-        ☰
+        <Menu className="h-6 w-6" />
       </button>
 
-      {/* Overlay when sidebar is open on mobile */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-          aria-hidden="true"
-        ></div>
-      )}
-
       {/* Sidebar */}
+      {/* Sidebar: mobile (fixed), desktop (static) */}
+      {/* Mobile sidebar (toggle) */}
       <aside
         className={clsx(
-          "fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full",
-          "md:translate-x-0 md:static md:inset-auto"
+          "fixed top-0 left-0 w-64 bg-white shadow-lg min-h-screen transform transition-transform duration-300 z-40 md:hidden",
+          {
+            "-translate-x-full": !isSidebarOpen,
+            "translate-x-0": isSidebarOpen,
+          }
         )}
       >
-        <div className="flex justify-between items-center p-6 border-b border-gray-200">
-          <div className="text-xl font-bold text-green-700">🛍 Admin Panel</div>
-          {/* Close button on mobile */}
-          <button
-            className="md:hidden p-2 rounded hover:bg-gray-200"
-            onClick={() => setSidebarOpen(false)}
-            aria-label="Sidebar хаах"
-          >
-            ✕
-          </button>
-        </div>
-        <nav className="space-y-1 px-3 py-4">
+        <div className="text-xl font-bold text-green-700 p-6">🛍 Admin Panel</div>
+        <nav className="space-y-1 px-3">
           {navItems.map(({ href, label, icon: Icon }) => (
             <Link
               key={href}
@@ -137,7 +111,28 @@ export default function AdminDashboardPage() {
                   ? "bg-green-200 text-green-900 font-medium"
                   : "text-gray-700"
               )}
-              onClick={() => setSidebarOpen(false)} // Sidebar-г хаах, мобайлд товч дарахад
+              onClick={() => setIsSidebarOpen(false)}
+            >
+              <Icon className="h-5 w-5" />
+              {label}
+            </Link>
+          ))}
+        </nav>
+      </aside>
+      {/* Desktop sidebar (always visible, static) */}
+      <aside className="hidden md:block w-64 bg-white shadow-lg min-h-screen">
+        <div className="text-xl font-bold text-green-700 p-6">🛍 Admin Panel</div>
+        <nav className="space-y-1 px-3">
+          {navItems.map(({ href, label, icon: Icon }) => (
+            <Link
+              key={href}
+              href={href}
+              className={clsx(
+                "flex items-center gap-3 px-4 py-3 rounded hover:bg-green-100 text-sm",
+                href === "/admin/dashboard"
+                  ? "bg-green-200 text-green-900 font-medium"
+                  : "text-gray-700"
+              )}
             >
               <Icon className="h-5 w-5" />
               {label}
@@ -146,57 +141,55 @@ export default function AdminDashboardPage() {
         </nav>
       </aside>
 
-      {/* Main content */}
-      <main className="flex-1 p-6 md:p-10 ml-0 md:ml-64 bg-gray-100 min-h-screen">
-        <h1 className="text-4xl font-bold text-gray-800 mb-10">🛠️ Хянах Самбар</h1>
+      {/* Content */}
+      <main className="flex-1 p-4 md:p-10 md:ml-64">
+        <h1 className="text-2xl md:text-4xl font-bold text-gray-800 mb-6 md:mb-10">
+          🛠️ Хянах Самбар
+        </h1>
 
         {/* Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mb-10">
-          <div className="bg-blue-600 text-white p-6 rounded-2xl shadow-lg flex flex-col items-center">
-            <BarChart3 className="h-10 w-10 mb-3" />
-            <p className="text-3xl font-bold">{stats.products}</p>
-            <p className="mt-2 text-lg">Бүтээгдэхүүн</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-8 mb-8 md:mb-10">
+          <div className="bg-blue-600 text-white p-4 md:p-6 rounded-xl md:rounded-2xl shadow-lg flex flex-col items-center">
+            <BarChart3 className="h-8 w-8 md:h-10 md:w-10 mb-2" />
+            <p className="text-2xl md:text-3xl font-bold">{stats.products}</p>
+            <p className="mt-1 text-sm md:text-lg">Бүтээгдэхүүн</p>
           </div>
-          <div className="bg-green-600 text-white p-6 rounded-2xl shadow-lg flex flex-col items-center">
-            <Users className="h-10 w-10 mb-3" />
-            <p className="text-3xl font-bold">{stats.users}</p>
-            <p className="mt-2 text-lg">Хэрэглэгчид</p>
+          <div className="bg-green-600 text-white p-4 md:p-6 rounded-xl md:rounded-2xl shadow-lg flex flex-col items-center">
+            <Users className="h-8 w-8 md:h-10 md:w-10 mb-2" />
+            <p className="text-2xl md:text-3xl font-bold">{stats.users}</p>
+            <p className="mt-1 text-sm md:text-lg">Хэрэглэгчид</p>
           </div>
-          <div className="bg-yellow-500 text-white p-6 rounded-2xl shadow-lg flex flex-col items-center">
-            <PackageCheck className="h-10 w-10 mb-3" />
-            <p className="text-3xl font-bold">{stats.orders}</p>
-            <p className="mt-2 text-lg">Захиалгууд</p>
+          <div className="bg-yellow-500 text-white p-4 md:p-6 rounded-xl md:rounded-2xl shadow-lg flex flex-col items-center">
+            <PackageCheck className="h-8 w-8 md:h-10 md:w-10 mb-2" />
+            <p className="text-2xl md:text-3xl font-bold">{stats.orders}</p>
+            <p className="mt-1 text-sm md:text-lg">Захиалгууд</p>
           </div>
         </div>
 
         {/* Monthly Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-10">
-          <div className="bg-purple-600 text-white p-6 rounded-2xl shadow-lg flex flex-col items-center">
-            <TrendingUp className="h-10 w-10 mb-3" />
-            <p className="text-3xl font-bold">
-              {monthlyStats?.soldProducts ?? "-"}
-            </p>
-            <p className="mt-2 text-lg">Энэ сард зарсан бараа</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 mb-8">
+          <div className="bg-purple-600 text-white p-4 md:p-6 rounded-xl md:rounded-2xl shadow-lg flex flex-col items-center">
+            <TrendingUp className="h-8 w-8 md:h-10 md:w-10 mb-2" />
+            <p className="text-2xl md:text-3xl font-bold">{monthlyStats?.soldProducts ?? "-"}</p>
+            <p className="mt-1 text-sm md:text-lg">Энэ сард зарсан бараа</p>
           </div>
-          <div className="bg-pink-600 text-white p-6 rounded-2xl shadow-lg flex flex-col items-center">
-            <PlusCircle className="h-10 w-10 mb-3" />
-            <p className="text-3xl font-bold">{monthlyStats?.newProducts ?? "-"}</p>
-            <p className="mt-2 text-lg">Энэ сард нэмэгдсэн бараа</p>
+          <div className="bg-pink-600 text-white p-4 md:p-6 rounded-xl md:rounded-2xl shadow-lg flex flex-col items-center">
+            <PlusCircle className="h-8 w-8 md:h-10 md:w-10 mb-2" />
+            <p className="text-2xl md:text-3xl font-bold">{monthlyStats?.newProducts ?? "-"}</p>
+            <p className="mt-1 text-sm md:text-lg">Энэ сард нэмэгдсэн бараа</p>
           </div>
-          <div className="bg-indigo-600 text-white p-6 rounded-2xl shadow-lg flex flex-col items-center">
-            <UserPlus className="h-10 w-10 mb-3" />
-            <p className="text-3xl font-bold">{monthlyStats?.newUsers ?? "-"}</p>
-            <p className="mt-2 text-lg">Энэ сард нэмэгдсэн хэрэглэгч</p>
+          <div className="bg-indigo-600 text-white p-4 md:p-6 rounded-xl md:rounded-2xl shadow-lg flex flex-col items-center">
+            <UserPlus className="h-8 w-8 md:h-10 md:w-10 mb-2" />
+            <p className="text-2xl md:text-3xl font-bold">{monthlyStats?.newUsers ?? "-"}</p>
+            <p className="mt-1 text-sm md:text-lg">Энэ сард нэмэгдсэн хэрэглэгч</p>
           </div>
-          <div className="bg-green-700 text-white p-6 rounded-2xl shadow-lg flex flex-col items-center">
-            <BarChart3 className="h-10 w-10 mb-3" />
-            <p className="text-3xl font-bold">
-              {monthlyStats?.totalRevenue?.toLocaleString() ?? "-"}
-            </p>
-            <p className="mt-2 text-lg">Энэ сард орсон орлого</p>
+          <div className="bg-green-700 text-white p-4 md:p-6 rounded-xl md:rounded-2xl shadow-lg flex flex-col items-center">
+            <BarChart3 className="h-8 w-8 md:h-10 md:w-10 mb-2" />
+            <p className="text-2xl md:text-3xl font-bold">{monthlyStats?.totalRevenue?.toLocaleString() ?? "-"}</p>
+            <p className="mt-1 text-sm md:text-lg">Энэ сард орсон орлого</p>
           </div>
         </div>
       </main>
-    </>
+    </div>
   );
 }

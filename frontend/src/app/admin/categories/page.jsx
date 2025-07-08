@@ -34,7 +34,6 @@ export default function AdminCategoriesPage() {
     { key: "users", label: "Хэрэглэгчид", icon: Users, href: "/admin/users" },
     { key: "categories", label: "Ангилал", icon: Tag, href: "/admin/categories" },
     { key: "coupons", label: "Купон", icon: Layers, href: "/admin/coupons" },
-    { key: "settings", label: "Тохиргоо", icon: Settings, href: "/admin/settings" },
     { key: "reports", label: "Тайлан", icon: FileBarChart2, href: "/admin/reports" },
   ];
 

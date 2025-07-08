@@ -14,6 +14,7 @@ const orderSchema = new mongoose.Schema({
   totalPrice: Number,
   payWithWallet: Boolean,
   payWithQr: Boolean,
+  // coupen талбарыг устгав
   coupon: {
     code: String,
     discount: Number,

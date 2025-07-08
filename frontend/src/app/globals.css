@@ -53,3 +53,84 @@ body {
 html, body {
   overflow-x: hidden;
 }
+
+/* Custom styles for react-responsive-carousel */
+.carousel .slide {
+  background: none !important;
+}
+
+.carousel .thumb {
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.carousel .thumb.selected, .carousel .thumb:hover {
+  border: 2px solid #3B82F6 !important; /* Blue-500 */
+}
+
+.carousel .control-arrow {
+  opacity: 0.7;
+}
+
+.carousel .control-arrow:hover {
+  opacity: 1;
+}
+
+.carousel .control-dots {
+  position: absolute;
+  bottom: 5px;
+  margin: 0;
+  width: 100%;
+  text-align: center;
+}
+
+.carousel .control-dots .dot {
+  background: #D1D5DB; /* Gray-300 */
+  box-shadow: none;
+  border: none;
+  width: 8px;
+  height: 8px;
+  margin: 0 4px;
+  transition: all 0.2s ease-in-out;
+}
+
+.carousel .control-dots .dot.selected {
+  background: #3B82F6; /* Blue-500 */
+  transform: scale(1.2);
+}
+
+.carousel .thumbs-wrapper {
+  margin: 20px;
+  overflow: hidden;
+}
+
+.carousel .thumbs {
+  display: flex;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+}
+
+.carousel .thumb {
+  width: 80px;
+  height: 80px;
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+  margin: 0 5px;
+  border-radius: 8px;
+}
+
+.carousel .thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+@media (max-width: 768px) {
+  .carousel .thumbs-wrapper {
+    display: none;
+  }
+}

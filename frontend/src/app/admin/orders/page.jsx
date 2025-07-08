@@ -1,5 +1,4 @@
-"use client";
-
+'use client'
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -23,7 +22,6 @@ export default function AdminOrdersPage() {
   const [staffList, setStaffList] = useState([]);
   const [selectedStaff, setSelectedStaff] = useState({});
   const [assigning, setAssigning] = useState({});
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
 
   const navItems = [
@@ -33,104 +31,62 @@ export default function AdminOrdersPage() {
     { key: "users", label: "Хэрэглэгчид", icon: Users, href: "/admin/users" },
     { key: "categories", label: "Ангилал", icon: Tag, href: "/admin/categories" },
     { key: "coupons", label: "Купон", icon: Layers, href: "/admin/coupons" },
-    { key: "settings", label: "Тохиргоо", icon: Settings, href: "/admin/settings" },
     { key: "reports", label: "Тайлан", icon: FileBarChart2, href: "/admin/reports" },
   ];
 
   useEffect(() => {
     const fetchOrders = async () => {
       if (!session?.accessToken) return;
-      try {
-        const res = await fetch('http://localhost:5000/api/orders/admin/orders', {
-          headers: {
-            Authorization: `Bearer ${session.accessToken}`,
-          },
-        });
-        const data = await res.json();
-        setOrders(data.orders || data || []);
-      } catch (error) {
-        console.error("Захиалга татахад алдаа:", error);
-      }
+      const res = await fetch('http://localhost:5000/api/orders/admin/orders', {
+        headers: {
+          Authorization: `Bearer ${session.accessToken}`,
+        },
+      });
+      const data = await res.json();
+      setOrders(data.orders || data || []);
       setLoading(false);
     };
     fetchOrders();
   }, [session]);
 
   useEffect(() => {
+    // Хүргэлтийн ажилтнуудыг авах
     if (!session?.accessToken) return;
     fetch("http://localhost:5000/api/delivery", {
       headers: { Authorization: `Bearer ${session.accessToken}` },
     })
       .then((res) => res.json())
-      .then((data) => setStaffList(data))
-      .catch(() => setStaffList([]));
+      .then((data) => setStaffList(data));
   }, [session]);
 
   const handleAssign = async (orderId) => {
     if (!selectedStaff[orderId]) return;
     setAssigning((prev) => ({ ...prev, [orderId]: true }));
-    try {
-      await fetch(`http://localhost:5000/api/admin/orders/${orderId}/assign`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session.accessToken}`,
-        },
-        body: JSON.stringify({ delivery: selectedStaff[orderId] }),
-      });
-      // Захиалгуудыг дахин ачаалах
-      const res = await fetch('http://localhost:5000/api/orders/admin/orders', {
-        headers: { Authorization: `Bearer ${session.accessToken}` },
-      });
-      const data = await res.json();
-      setOrders(data.orders || data || []);
-    } catch (error) {
-      alert("Хуваарилахад алдаа гарлаа");
-    }
+    await fetch(`http://localhost:5000/api/admin/orders/${orderId}/assign`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${session.accessToken}`,
+      },
+      body: JSON.stringify({ delivery: selectedStaff[orderId] }),
+    });
+    // Захиалгуудыг дахин ачаалах
+    const res = await fetch('http://localhost:5000/api/orders/admin/orders', {
+      headers: { Authorization: `Bearer ${session.accessToken}` },
+    });
+    const data = await res.json();
+    setOrders(data.orders || data || []);
     setAssigning((prev) => ({ ...prev, [orderId]: false }));
   };
 
   if (loading) return <div>Уншиж байна...</div>;
 
   return (
-    <>
-      {/* Mobile toggle button */}
-      <button
-        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded bg-green-600 text-white shadow"
-        onClick={() => setSidebarOpen(true)}
-        aria-label="Sidebar нээх"
-      >
-        ☰
-      </button>
-
-      {/* Overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-          aria-hidden="true"
-        />
-      )}
-
+    <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar */}
-      <aside
-        className={clsx(
-          "fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full",
-          "md:translate-x-0 md:static md:inset-auto"
-        )}
-      >
-        <div className="flex justify-between items-center p-6 border-b border-gray-200">
-          <div className="text-xl font-bold text-green-700">🛍 Admin Panel</div>
-          <button
-            className="md:hidden p-2 rounded hover:bg-gray-200"
-            onClick={() => setSidebarOpen(false)}
-            aria-label="Sidebar хаах"
-          >
-            ✕
-          </button>
-        </div>
-        <nav className="space-y-1 px-3 py-4">
+      <aside className="w-64 bg-white shadow-lg min-h-screen">
+        <div className="text-xl font-bold text-green-700 p-6">🛍 Admin Panel</div>
+        <nav className="space-y-1 px-3">
           {navItems.map(({ key, label, icon: Icon, href }) => (
             <Link
               key={key}
@@ -141,7 +97,6 @@ export default function AdminOrdersPage() {
                   ? "bg-green-200 text-green-900 font-medium"
                   : "text-gray-700"
               )}
-              onClick={() => setSidebarOpen(false)}
             >
               <Icon className="h-5 w-5" />
               {label}
@@ -151,7 +106,7 @@ export default function AdminOrdersPage() {
       </aside>
 
       {/* Content */}
-      <main className="flex-1 p-6 md:p-10 ml-0 md:ml-64 bg-gray-100 min-h-screen">
+      <main className="flex-1 p-10">
         <h1 className="text-2xl font-bold mb-4">Бүх захиалгууд</h1>
         <div className="overflow-x-auto">
           <table className="min-w-full bg-white text-black text-sm">
@@ -239,6 +194,6 @@ export default function AdminOrdersPage() {
           </table>
         </div>
       </main>
-    </>
+    </div>
   );
 }

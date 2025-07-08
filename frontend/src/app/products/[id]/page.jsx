@@ -12,8 +12,10 @@ import ReactMarkdown from "react-markdown";
 
 const fallbackImg = "/fallback.jpg"; // public/fallback.jpg байрлуулна
 
+import { Carousel } from "react-responsive-carousel";
+import "react-responsive-carousel/lib/styles/carousel.min.css"; // import css
+
 function ProductImages({ images = [] }) {
-  const [selectedImage, setSelectedImage] = useState(images[0]);
   const [imgError, setImgError] = useState(false);
 
   const getImageUrl = (img) => {
@@ -23,38 +25,29 @@ function ProductImages({ images = [] }) {
   };
 
   return (
-    <div>
-      <div className="aspect-square bg-gray-100 rounded-2xl overflow-hidden mb-4 flex items-center justify-center">
-        <img
-          src={imgError ? fallbackImg : getImageUrl(selectedImage)}
-          alt="Бүтээгдэхүүний зураг"
-          className="w-full h-full object-cover"
-          onError={() => setImgError(true)}
-        />
-      </div>
-      <div className="grid grid-cols-4 gap-2">
+    <div className="relative">
+      <Carousel
+        showArrows={true}
+        showStatus={false}
+        showIndicators={true}
+        showThumbs={true}
+        infiniteLoop={true}
+        useKeyboardArrows={true}
+        dynamicHeight={false}
+        className="product-carousel"
+        thumbClassName="carousel-thumb"
+      >
         {images.map((img, i) => (
-          <img
-            key={i}
-            src={getImageUrl(img)}
-            alt={`Зураг ${i + 1}`}
-            className={`aspect-square rounded-lg object-cover cursor-pointer border-2 transition-all duration-200
-              ${
-                selectedImage === img
-                  ? "border-blue-500 scale-105"
-                  : "border-transparent"
-              }
-              hover:border-blue-400 hover:scale-105`}
-            onClick={() => {
-              setSelectedImage(img);
-              setImgError(false);
-            }}
-            onError={(e) => {
-              e.target.src = fallbackImg;
-            }}
-          />
+          <div key={i} className="aspect-square bg-gray-100 rounded-2xl overflow-hidden flex items-center justify-center">
+            <img
+              src={imgError ? fallbackImg : getImageUrl(img)}
+              alt="Бүтээгдэхүүний зураг"
+              className="w-full h-full object-cover"
+              onError={() => setImgError(true)}
+            />
+          </div>
         ))}
-      </div>
+      </Carousel>
     </div>
   );
 }
@@ -79,6 +72,14 @@ export default function ProductDetailPage() {
 
   const { addToCart, userId } = useCart();
   const { wishlist, addToWishlist, removeFromWishlist } = useWishlist();
+
+  const handleWishlistToggle = (product) => {
+    if (isWished) {
+      removeFromWishlist(product._id);
+    } else {
+      addToWishlist(product);
+    }
+  };
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -536,12 +537,23 @@ export default function ProductDetailPage() {
                 {cartError && (
                   <div className="text-red-600 text-xs font-semibold mb-1">{cartError}</div>
                 )}
-                <button
-                  onClick={handleAddToCart}
-                  className="w-full bg-blue-700 text-white py-2 rounded-full font-bold text-base shadow hover:bg-blue-800 transition"
-                >
-                  🛒 Сагсанд нэмэх
-                </button>
+                <div className="flex gap-4">
+                  <button
+                    onClick={handleAddToCart}
+                    className="flex-1 bg-blue-700 text-white py-2 rounded-full font-bold text-base shadow hover:bg-blue-800 transition"
+                  >
+                    🛒 Сагсанд нэмэх
+                  </button>
+                  <button
+                    onClick={() => handleWishlistToggle(product)}
+                    className={`w-12 h-12 flex items-center justify-center rounded-full shadow transition
+                      ${isWished ? "bg-red-500 text-white" : "bg-gray-200 text-gray-600 hover:bg-red-100 hover:text-red-500"}
+                    `}
+                    aria-label="Хүслийн жагсаалт"
+                  >
+                    <FaHeart className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
             </div>
           </div>

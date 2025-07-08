@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
@@ -20,21 +19,17 @@ import { useRouter } from "next/navigation";
 export default function AdminProductsPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-
-  // Sidebar toggle state
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [activeMenu, setActiveMenu] = useState("products");
 
   const navItems = [
     { key: "dashboard", label: "Хянах самбар", icon: BarChart3, href: "/admin/dashboard" },
     { key: "products", label: "Бүтээгдэхүүн", icon: PlusCircle, href: "/admin/products" },
     { key: "orders", label: "Захиалгууд", icon: PackageCheck, href: "/admin/orders" },
-    { key: "users", label: "Хэрэглэгчид", icon: Users, href: "/admin/users" },
+    { key: "users", label: "Хэрэглэгчид", icon: Users, href: "/users" },
     { key: "categories", label: "Ангилал", icon: Tag, href: "/admin/categories" },
     { key: "coupons", label: "Купон", icon: Layers, href: "/admin/coupons" },
-    { key: "settings", label: "Тохиргоо", icon: Settings, href: "/admin/settings" },
     { key: "reports", label: "Тайлан", icon: FileBarChart2, href: "/admin/reports" },
   ];
 
@@ -53,7 +48,7 @@ export default function AdminProductsPage() {
   useEffect(() => {
     axios
       .get("http://localhost:5000/api/products")
-      .then((res) => setProducts(res.data))
+      .then((res) => setProducts(res.data.products || []))
       .catch(() => setProducts([]));
   }, []);
 
@@ -84,6 +79,7 @@ export default function AdminProductsPage() {
   };
 
   function isDiscountActive(product) {
+    // discountEnd, discountExpires аль алиныг нь шалгахад тохиромжтой
     if (!product?.discountEnd && !product?.discountExpires) return product.discount > 0;
     const end = product.discountEnd || product.discountExpires;
     return product.discount > 0 && new Date(end) > new Date();
@@ -92,45 +88,11 @@ export default function AdminProductsPage() {
   if (status === "loading") return <div>Ачааллаж байна...</div>;
 
   return (
-    <>
-      {/* Mobile toggle button */}
-      <button
-        className="md:hidden fixed top-4 left-4 z-50 p-2 rounded bg-green-600 text-white shadow"
-        onClick={() => setSidebarOpen(true)}
-        aria-label="Sidebar нээх"
-      >
-        ☰
-      </button>
-
-      {/* Overlay when sidebar is open on mobile */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-          aria-hidden="true"
-        />
-      )}
-
+    <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar */}
-      <aside
-        className={clsx(
-          "fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full",
-          "md:translate-x-0 md:static md:inset-auto"
-        )}
-      >
-        <div className="flex justify-between items-center p-6 border-b border-gray-200">
-          <div className="text-xl font-bold text-green-700">🛍 Admin Panel</div>
-          {/* Close button on mobile */}
-          <button
-            className="md:hidden p-2 rounded hover:bg-gray-200"
-            onClick={() => setSidebarOpen(false)}
-            aria-label="Sidebar хаах"
-          >
-            ✕
-          </button>
-        </div>
-        <nav className="space-y-1 px-3 py-4">
+      <aside className="w-64 bg-white shadow-lg min-h-screen">
+        <div className="text-xl font-bold text-green-700 p-6">🛍 Admin Panel</div>
+        <nav className="space-y-1 px-3">
           {navItems.map(({ key, label, icon: Icon, href }) => (
             <Link
               key={key}
@@ -141,7 +103,6 @@ export default function AdminProductsPage() {
                   ? "bg-green-200 text-green-900 font-medium"
                   : "text-gray-700"
               )}
-              onClick={() => setSidebarOpen(false)} // Sidebar-г хаах мобайл дээр товч дарахад
             >
               <Icon className="h-5 w-5" />
               {label}
@@ -151,7 +112,7 @@ export default function AdminProductsPage() {
       </aside>
 
       {/* Content */}
-      <main className="flex-1 p-6 md:p-10 ml-0 md:ml-64 bg-gray-100 min-h-screen">
+      <main className="flex-1 p-10">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Бүтээгдэхүүний жагсаалт</h1>
           <Link
@@ -213,6 +174,6 @@ export default function AdminProductsPage() {
           </table>
         </div>
       </main>
-    </>
+    </div>
   );
 }

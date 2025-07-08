@@ -121,14 +121,47 @@ export const getProductsByCategoryId = async (req, res) => {
   }
 }
 
+// Бүтээгдэхүүнүүдийг хайлт хийх боломжтойгоор авах (нэр, тайлбар, product id, category id)
 export const getProducts = async (req, res) => {
   try {
-    const products = await Product.find().populate('category', 'name')
-    res.json(products)
+    const { q, productId, categoryId } = req.query;
+    let filter = {};
+
+    if (q && q.trim()) {
+      const regex = new RegExp(q.trim(), "i");
+      filter.$or = [
+        { name: regex },
+        { description: regex },
+      ];
+    }
+
+    if (productId && productId.length === 24) {
+      // Мөн productId-гаар хайх
+      filter._id = productId;
+    }
+
+
+    if (categoryId && categoryId.trim()) {
+      // Category-ийн нэрээр болон subcategory-уудыг хамтад нь хайх
+      const mainCategory = await Category.findOne({ name: { $regex: new RegExp(categoryId.trim(), "i") } });
+      if (mainCategory) {
+        // Subcategory-уудыг авах
+        const subCategories = await Category.find({ parent: mainCategory._id }).select('_id');
+        const subCategoryIds = subCategories.map((cat) => cat._id.toString());
+        const allCategoryIds = [mainCategory._id.toString(), ...subCategoryIds];
+        filter.category = { $in: allCategoryIds };
+      } else {
+        // Хэрвээ ийм нэртэй category байхгүй бол хоосон үр дүн буцаана
+        return res.json({ products: [] });
+      }
+    }
+
+    const products = await Product.find(filter).populate('category', 'name');
+    res.json({ products });
   } catch (err) {
-    res.status(500).json({ error: err.message })
+    res.status(500).json({ error: err.message });
   }
-}
+};
 
 export const getProduct = async (req, res) => {
   try {
